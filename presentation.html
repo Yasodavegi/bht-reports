@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BHT CareLog – Enterprise Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy:#0A1628;
+  --navy2:#0F2040;
+  --blue:#1E6FD9;
+  --blue2:#2D8BFA;
+  --teal:#0AADAD;
+  --mint:#E6FAF8;
+  --gold:#F4A72A;
+  --white:#FFFFFF;
+  --off:#F7F9FC;
+  --gray:#8A96A8;
+  --gray2:#CBD3DF;
+  --ink:#111827;
+  --ink2:#374151;
+  --ink3:#6B7280;
+  --success:#12B76A;
+  --warn:#F79009;
+  --danger:#F04438;
+  --border:#E5EBF4;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--white);color:var(--ink);line-height:1.6;overflow-x:hidden;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,22,40,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08);padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;}
+.nav-logo-mark{width:34px;height:34px;background:linear-gradient(135deg,var(--blue) 0%,var(--teal) 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;}
+.nav-logo-text{font-size:17px;font-weight:700;color:#fff;}
+.nav-logo-text span{color:var(--teal);}
+.nav-links{display:flex;gap:32px;}
+.nav-links a{font-size:13px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:#fff;}
+.nav-cta{padding:8px 20px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s;}
+.nav-cta:hover{background:var(--blue2);}
+
+/* ── SECTIONS ── */
+section{padding:100px 80px;max-width:1200px;margin:0 auto;}
+.full-bleed{max-width:none;padding:0;}
+.full-bleed > .inner{max-width:1200px;margin:0 auto;padding:100px 80px;}
+
+/* ── HERO ── */
+.hero-section{min-height:100vh;background:var(--navy);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:0;}
+.hero-bg{position:absolute;inset:0;pointer-events:none;}
+.hero-circle{position:absolute;border-radius:50%;opacity:.12;}
+.hero-circle.c1{width:600px;height:600px;background:radial-gradient(circle,var(--blue) 0%,transparent 70%);top:-100px;right:-100px;}
+.hero-circle.c2{width:400px;height:400px;background:radial-gradient(circle,var(--teal) 0%,transparent 70%);bottom:-80px;left:-80px;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-inner{position:relative;z-index:2;text-align:center;padding:120px 48px 80px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-bottom:28px;}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+.hero-title{font-family:'Instrument Serif',serif;font-size:72px;font-weight:400;line-height:1.08;color:#fff;margin-bottom:20px;}
+.hero-title em{font-style:italic;color:var(--teal);}
+.hero-title strong{font-style:normal;color:#fff;}
+.hero-sub{font-size:20px;color:rgba(255,255,255,.6);max-width:600px;margin:0 auto 40px;line-height:1.6;}
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{padding:14px 32px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+.btn-primary:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(30,111,217,.4);}
+.btn-outline{padding:14px 32px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+.btn-outline:hover{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.06);}
+.hero-stats{display:flex;gap:48px;justify-content:center;margin-top:72px;padding-top:48px;border-top:1px solid rgba(255,255,255,.1);flex-wrap:wrap;}
+.hero-stat{text-align:center;}
+.hero-stat-num{font-family:'Instrument Serif',serif;font-size:42px;color:#fff;line-height:1;}
+.hero-stat-label{font-size:13px;color:rgba(255,255,255,.45);margin-top:4px;}
+
+/* ── EYEBROW ── */
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;}
+.section-title{font-family:'Instrument Serif',serif;font-size:44px;font-weight:400;line-height:1.15;margin-bottom:16px;color:var(--ink);}
+.section-title em{font-style:italic;color:var(--blue);}
+.section-sub{font-size:17px;color:var(--ink3);max-width:560px;line-height:1.6;}
+
+/* ── PROBLEM ── */
+.problem-section{background:var(--off);}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:56px;}
+.problem-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;}
+.problem-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;background:var(--danger);}
+.problem-icon{font-size:28px;margin-bottom:16px;}
+.problem-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px;}
+.problem-desc{font-size:14px;color:var(--ink3);line-height:1.6;}
+.problem-tag{display:inline-block;margin-top:14px;padding:3px 10px;background:#FEF3F2;color:var(--danger);border-radius:99px;font-size:11px;font-weight:600;}
+
+/* ── SOLUTION ── */
+.solution-layout{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-top:64px;}
+.solution-features{display:flex;flex-direction:column;gap:20px;}
+.sol-feat{display:flex;gap:16px;align-items:flex-start;}
+.sol-feat-icon{width:44px;height:44px;border-radius:12px;background:var(--mint);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.sol-feat-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.sol-feat-desc{font-size:13px;color:var(--ink3);line-height:1.55;}
+.app-mockup{background:var(--navy);border-radius:20px;overflow:hidden;box-shadow:0 32px 80px rgba(10,22,40,.35);border:1px solid rgba(255,255,255,.08);}
+.mock-bar{background:rgba(255,255,255,.06);padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06);}
+.mock-dot{width:10px;height:10px;border-radius:50%;}
+.mock-header{background:#0F2040;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;}
+.mock-org{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase;}
+.mock-title{font-size:14px;font-weight:700;color:#fff;}
+.mock-pill{font-size:10px;padding:4px 10px;border-radius:99px;background:rgba(18,183,106,.15);border:1px solid rgba(18,183,106,.3);color:#6EE7B7;}
+.mock-datebar{background:rgba(255,255,255,.04);padding:10px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06);}
+.mock-dateinput{flex:1;padding:7px 12px;border-radius:8px;border:2px solid var(--blue);background:rgba(30,111,217,.1);color:#93C5FD;font-size:13px;font-weight:600;}
+.mock-loadbtn{padding:7px 14px;background:var(--blue);color:#fff;border-radius:8px;font-size:12px;font-weight:600;}
+.mock-tabs{display:flex;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);}
+.mock-tab{padding:10px 14px;font-size:11px;font-weight:500;color:rgba(255,255,255,.35);border-bottom:2px solid transparent;white-space:nowrap;}
+.mock-tab.on{color:var(--blue2);border-bottom-color:var(--blue2);font-weight:600;}
+.mock-body{padding:14px 18px;background:rgba(0,0,0,.15);}
+.mock-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;margin-bottom:10px;}
+.mock-card-title{font-size:9px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;}
+.mock-field{margin-bottom:8px;}
+.mock-field label{font-size:10px;color:rgba(255,255,255,.35);display:block;margin-bottom:3px;}
+.mock-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;font-size:12px;color:rgba(255,255,255,.8);width:100%;}
+.mock-chips{display:flex;gap:6px;}
+.mock-chip{padding:5px 10px;border-radius:99px;font-size:10px;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.45);}
+.mock-chip.on{background:rgba(30,111,217,.2);border-color:var(--blue2);color:#93C5FD;font-weight:600;}
+
+/* ── FEATURES ── */
+.features-section{background:var(--navy);position:relative;overflow:hidden;}
+.features-section .section-title{color:#fff;}
+.features-section .section-sub{color:rgba(255,255,255,.5);}
+.features-section .eyebrow{color:var(--teal);}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;}
+.feat-tile{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;transition:all .2s;}
+.feat-tile:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);transform:translateY(-2px);}
+.feat-tile-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;}
+.feat-tile-icon.blue{background:rgba(30,111,217,.2);}
+.feat-tile-icon.teal{background:rgba(10,173,173,.15);}
+.feat-tile-icon.gold{background:rgba(244,167,42,.15);}
+.feat-tile-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;}
+.feat-tile-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;}
+.feat-tile-tag{display:inline-block;margin-top:14px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;}
+.tag-new{background:rgba(10,173,173,.15);color:var(--teal);}
+.tag-core{background:rgba(30,111,217,.15);color:var(--blue2);}
+.tag-hipaa{background:rgba(18,183,106,.12);color:#34D399;}
+
+/* ── HIPAA ── */
+.hipaa-section{background:linear-gradient(135deg,#0A1628 0%,#0D2244 50%,#0A1628 100%);position:relative;overflow:hidden;}
+.hipaa-section::before{content:'🔒';position:absolute;right:-40px;top:50%;transform:translateY(-50%);font-size:320px;opacity:.03;pointer-events:none;}
+.hipaa-section .section-title{color:#fff;}
+.hipaa-section .section-sub{color:rgba(255,255,255,.5);}
+.hipaa-section .eyebrow{color:var(--gold);}
+.hipaa-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:56px;}
+.hipaa-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px;display:flex;gap:18px;}
+.hipaa-card-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,rgba(244,167,42,.2),rgba(244,167,42,.05));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.hipaa-card-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:6px;}
+.hipaa-card-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;}
+.hipaa-card-points{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
+.hipaa-point{font-size:12px;color:rgba(255,255,255,.45);display:flex;align-items:flex-start;gap:6px;}
+.hipaa-point::before{content:'✓';color:var(--success);font-weight:700;flex-shrink:0;}
+.hipaa-cert-row{display:flex;gap:16px;margin-top:48px;flex-wrap:wrap;}
+.hipaa-cert{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px 24px;display:flex;align-items:center;gap:12px;flex:1;min-width:180px;}
+.hipaa-cert-icon{font-size:24px;}
+.hipaa-cert-label{font-size:13px;font-weight:600;color:#fff;}
+.hipaa-cert-sub{font-size:11px;color:rgba(255,255,255,.4);}
+
+/* ── WORKFLOW ── */
+.workflow-section{background:var(--off);}
+.workflow-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:64px;position:relative;}
+.workflow-steps::before{content:'';position:absolute;top:36px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--blue),var(--teal));z-index:0;}
+.wf-step{text-align:center;position:relative;z-index:1;}
+.wf-num{width:72px;height:72px;border-radius:50%;background:var(--navy);border:3px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 16px;color:#fff;position:relative;}
+.wf-num::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(30,111,217,.2);}
+.wf-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.wf-desc{font-size:12px;color:var(--ink3);line-height:1.5;padding:0 8px;}
+
+/* ── WHO ── */
+.who-section{background:#fff;}
+.who-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;}
+.who-card{border-radius:20px;padding:36px 28px;position:relative;overflow:hidden;}
+.who-card.blue{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);}
+.who-card.teal{background:linear-gradient(135deg,#F0FDFA,#CCFBF1);}
+.who-card.gold{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);}
+.who-card-icon{font-size:48px;margin-bottom:20px;}
+.who-card-title{font-size:20px;font-weight:700;color:var(--ink);margin-bottom:10px;}
+.who-card-desc{font-size:14px;color:var(--ink2);line-height:1.6;margin-bottom:20px;}
+.who-card-points{display:flex;flex-direction:column;gap:8px;}
+.who-point{font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;}
+.who-point-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:6px;}
+.who-card.blue .who-point-dot{background:var(--blue);}
+.who-card.teal .who-point-dot{background:var(--teal);}
+.who-card.gold .who-point-dot{background:var(--gold);}
+
+/* ── COMPARE ── */
+.compare-section{background:var(--navy);}
+.compare-section .section-title{color:#fff;}
+.compare-section .section-sub{color:rgba(255,255,255,.5);}
+.compare-section .eyebrow{color:var(--teal);}
+.compare-table{margin-top:56px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.1);}
+.compare-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;background:rgba(255,255,255,.05);}
+.compare-col-head{padding:16px 20px;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-align:center;}
+.compare-col-head.highlight{background:rgba(30,111,217,.15);color:var(--blue2);}
+.compare-col-head:first-child{text-align:left;}
+.compare-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;border-top:1px solid rgba(255,255,255,.06);}
+.compare-row:nth-child(even){background:rgba(255,255,255,.02);}
+.compare-cell{padding:14px 20px;font-size:13px;color:rgba(255,255,255,.6);text-align:center;display:flex;align-items:center;justify-content:center;}
+.compare-cell.feature{text-align:left;justify-content:flex-start;font-weight:500;color:rgba(255,255,255,.8);}
+.compare-cell.highlight{background:rgba(30,111,217,.07);}
+.check{color:var(--success);font-size:16px;}
+.cross{color:var(--danger);font-size:16px;}
+.partial{color:var(--warn);font-size:13px;font-weight:600;}
+
+/* ── TECH STACK ── */
+.tech-section{background:var(--off);}
+.tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:56px;}
+.tech-block{background:#fff;border:1px solid var(--border);border-radius:16px;padding:28px;}
+.tech-block-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.tech-block-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.tech-block-icon.blue{background:rgba(30,111,217,.1);}
+.tech-block-icon.teal{background:rgba(10,173,173,.1);}
+.tech-block-icon.gold{background:rgba(244,167,42,.1);}
+.tech-block-icon.green{background:rgba(18,183,106,.1);}
+.tech-items{display:flex;flex-direction:column;gap:10px;}
+.tech-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--off);border-radius:8px;}
+.tech-item-label{font-size:13px;font-weight:600;color:var(--ink);flex:1;}
+.tech-item-desc{font-size:12px;color:var(--ink3);}
+.tech-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;}
+.tb-hipaa{background:#F0FDF4;color:var(--success);}
+.tb-enc{background:#EFF6FF;color:var(--blue);}
+.tb-cloud{background:#F0FDFA;color:var(--teal);}
+
+/* ── ROI ── */
+.roi-section{background:linear-gradient(135deg,var(--navy) 0%,#0D2244 100%);}
+.roi-section .section-title{color:#fff;}
+.roi-section .section-sub{color:rgba(255,255,255,.5);}
+.roi-section .eyebrow{color:var(--gold);}
+.roi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:56px;}
+.roi-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;text-align:center;}
+.roi-num{font-family:'Instrument Serif',serif;font-size:52px;color:var(--gold);line-height:1;margin-bottom:8px;}
+.roi-label{font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;}
+.roi-desc{font-size:12px;color:rgba(255,255,255,.4);line-height:1.5;}
+
+/* ── DEPLOYMENT ── */
+.deploy-section{background:#fff;}
+.deploy-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:56px;}
+.deploy-card{border:2px solid var(--border);border-radius:20px;padding:32px;position:relative;transition:all .2s;}
+.deploy-card:hover{border-color:var(--blue);box-shadow:0 8px 32px rgba(30,111,217,.1);}
+.deploy-card.featured{border-color:var(--blue);background:linear-gradient(135deg,#EFF6FF,#fff);}
+.deploy-featured-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:4px 16px;border-radius:99px;white-space:nowrap;}
+.deploy-title{font-size:20px;font-weight:700;color:var(--ink);margin-bottom:8px;}
+.deploy-sub{font-size:13px;color:var(--ink3);margin-bottom:24px;}
+.deploy-points{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.deploy-point{font-size:13px;color:var(--ink2);display:flex;align-items:flex-start;gap:8px;}
+.deploy-point-check{color:var(--success);font-weight:700;flex-shrink:0;}
+.deploy-btn{width:100%;padding:12px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+.deploy-btn.primary{background:var(--blue);color:#fff;}
+.deploy-btn.outline{background:transparent;border:2px solid var(--blue);color:var(--blue);}
+
+/* ── CTA ── */
+.cta-section{background:linear-gradient(135deg,var(--blue) 0%,var(--teal) 100%);padding:100px 80px;text-align:center;}
+.cta-title{font-family:'Instrument Serif',serif;font-size:52px;color:#fff;margin-bottom:16px;line-height:1.1;}
+.cta-title em{font-style:italic;}
+.cta-sub{font-size:18px;color:rgba(255,255,255,.75);margin-bottom:40px;}
+.cta-actions{display:flex;gap:16px;justify-content:center;}
+.btn-white{padding:14px 36px;background:#fff;color:var(--blue);border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.15);}
+.btn-white-outline{padding:14px 36px;background:transparent;color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-white-outline:hover{border-color:#fff;background:rgba(255,255,255,.1);}
+
+/* ── FOOTER ── */
+footer{background:var(--navy);padding:40px 80px;display:flex;align-items:center;justify-content:space-between;}
+.footer-logo{font-size:16px;font-weight:700;color:#fff;}
+.footer-logo span{color:var(--teal);}
+.footer-text{font-size:12px;color:rgba(255,255,255,.3);}
+
+/* ── UTILS ── */
+.text-center{text-align:center;}
+.text-center .section-sub{margin:0 auto;}
+.mt-4{margin-top:16px;}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600;}
+.chip-blue{background:rgba(30,111,217,.1);color:var(--blue);}
+.chip-teal{background:rgba(10,173,173,.1);color:var(--teal);}
+.chip-gold{background:rgba(244,167,42,.1);color:var(--warn);}
+.chip-green{background:rgba(18,183,106,.1);color:var(--success);}
+
+/* ── SCROLL ANIMATIONS ── */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease;}
+.fade-up.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:0 24px;}
+  section,.full-bleed>.inner{padding:64px 24px;}
+  .hero-title{font-size:44px;}
+  .problem-grid,.feat-grid,.who-grid,.deploy-grid{grid-template-columns:1fr;}
+  .solution-layout,.hipaa-grid,.tech-grid{grid-template-columns:1fr;}
+  .roi-grid{grid-template-columns:1fr 1fr;}
+  .workflow-steps{grid-template-columns:1fr;}
+  .workflow-steps::before{display:none;}
+  .compare-table{overflow-x:auto;}
+  .hero-stats{gap:24px;}
+  .cta-section{padding:64px 24px;}
+  footer{flex-direction:column;gap:12px;text-align:center;padding:32px 24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-mark">B</div>
+    <div class="nav-logo-text">BHT <span>CareLog</span></div>
+  </div>
+  <div class="nav-links">
+    <a href="#solution">Solution</a>
+    <a href="#features">Features</a>
+    <a href="#hipaa">HIPAA</a>
+    <a href="#who">Who It's For</a>
+    <a href="#deployment">Deployment</a>
+  </div>
+  <button class="nav-cta">Request Demo</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero-section">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-circle c1"></div>
+    <div class="hero-circle c2"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="hero-badge-dot"></span>HIPAA-Compliant · Enterprise-Ready · Cloud-Native</div>
+    <div class="hero-title">The smarter way to<br/>document <em>behavioral</em><br/>health sessions</div>
+    <div class="hero-sub">BHT CareLog replaces paper forms, spreadsheets, and manual reports with a secure, real-time platform built specifically for Behavior Health Technicians.</div>
+    <div class="hero-actions">
+      <a href="#solution" class="btn-primary">See How It Works →</a>
+      <a href="#features" class="btn-outline">Explore Features</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">75%</div><div class="hero-stat-label">Reduction in documentation time</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">100%</div><div class="hero-stat-label">HIPAA compliant by design</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">Zero</div><div class="hero-stat-label">Paper. Zero lost records.</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">Real-time</div><div class="hero-stat-label">Supervisor visibility</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<div class="full-bleed problem-section">
+  <div class="inner fade-up">
+    <div class="eyebrow">The Problem</div>
+    <div class="section-title">BHT documentation is<br/><em>broken</em> today</div>
+    <div class="section-sub">Healthcare agencies, school districts, and ABA therapy centers are losing time, compliance, and money to outdated documentation processes.</div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">📄</div>
+        <div class="problem-title">Paper-based forms</div>
+        <div class="problem-desc">BHTs fill out handwritten forms daily — pages get lost, handwriting is illegible, and filing takes hours. There's no search, no audit trail, and no backup.</div>
+        <div class="problem-tag">High Risk</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📊</div>
+        <div class="problem-title">Spreadsheets & manual exports</div>
+        <div class="problem-desc">Excel files stored on personal computers with no version control, no access management, and zero HIPAA compliance. One laptop failure = all data lost.</div>
+        <div class="problem-tag">HIPAA Violation Risk</div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🔍</div>
+        <div class="problem-title">No supervisor visibility</div>
+        <div class="problem-desc">Supervisors can't see daily notes in real time. Billing errors aren't caught until the end of the month. Incident patterns go unnoticed for weeks.</div>
+        <div class="problem-tag">Billing Loss</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOLUTION -->
+<section id="solution" class="fade-up">
+  <div class="solution-layout">
+    <div>
+      <div class="eyebrow">The Solution</div>
+      <div class="section-title">One platform. Every session. <em>Perfectly documented.</em></div>
+      <div class="section-sub" style="margin-bottom:36px;">BHT CareLog gives your team a structured, cloud-backed, HIPAA-compliant workflow from the moment a session starts to the moment the report is signed.</div>
+      <div class="solution-features">
+        <div class="sol-feat">
+          <div class="sol-feat-icon">📅</div>
+          <div><div class="sol-feat-title">Date-based session management</div><div class="sol-feat-desc">Each service date is its own record. Load any past session, edit in real time, and every change is tracked with a full audit trail.</div></div>
+        </div>
+        <div class="sol-feat">
+          <div class="sol-feat-icon">📝</div>
+          <div><div class="sol-feat-title">Structured ABC behavior logging</div><div class="sol-feat-desc">Antecedent → Behavior → Intervention → Response. The exact format supervisors and billing teams need, every time, without variation.</div></div>
+        </div>
+        <div class="sol-feat">
+          <div class="sol-feat-icon">🖨</div>
+          <div><div class="sol-feat-title">One-click professional reports</div><div class="sol-feat-desc">Generate signed, branded, print-ready PDF reports in seconds — matching your agency's exact form layout with digital signatures embedded.</div></div>
+        </div>
+        <div class="sol-feat">
+          <div class="sol-feat-icon">☁️</div>
+          <div><div class="sol-feat-title">Cloud-synced, never lost</div><div class="sol-feat-desc">Every keystroke is saved to encrypted cloud storage. No more lost paper, crashed laptops, or accidentally overwritten spreadsheets.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="app-mockup">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#FF5F57;"></div>
+        <div class="mock-dot" style="background:#FEBC2E;"></div>
+        <div class="mock-dot" style="background:#28C840;"></div>
+      </div>
+      <div class="mock-header">
+        <div><div class="mock-org">ABC Health Services</div><div class="mock-title">BHT CareLog</div></div>
+        <div class="mock-pill">● Saved 9:15 AM</div>
+      </div>
+      <div class="mock-datebar">
+        <div style="font-size:11px;color:rgba(255,255,255,.4);">📅 Date:</div>
+        <div class="mock-dateinput">05/09/2026</div>
+        <div class="mock-loadbtn">Load / New</div>
+      </div>
+      <div class="mock-tabs">
+        <div class="mock-tab on">Session Info</div>
+        <div class="mock-tab">Behaviors <span style="background:#2D8BFA;color:#fff;border-radius:99px;padding:1px 5px;font-size:9px;margin-left:2px;">5</span></div>
+        <div class="mock-tab">Summary</div>
+        <div class="mock-tab">Reports</div>
+        <div class="mock-tab">Print</div>
+      </div>
+      <div class="mock-body">
+        <div class="mock-card">
+          <div class="mock-card-title">Session Type</div>
+          <div class="mock-chips">
+            <div class="mock-chip on">✓ In person</div>
+            <div class="mock-chip">Telehealth</div>
+            <div class="mock-chip">Audio Only</div>
+          </div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-card-title">Client & Session Details</div>
+          <div class="mock-field"><label>Client name</label><div class="mock-input">Jim Gary</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="mock-field"><label>Start time</label><div class="mock-input">8:15 AM</div></div>
+            <div class="mock-field"><label>End time</label><div class="mock-input">4:15 PM</div></div>
+          </div>
+          <div class="mock-field"><label>Total Hrs (auto)</label><div class="mock-input">8 hours</div></div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-card-title">Goals Worked On</div>
+          <div class="mock-field"><div class="mock-input">1. Decrease Non-compliant Behaviors</div></div>
+          <div class="mock-field"><div class="mock-input">2. Increase Social Skills</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<div class="full-bleed features-section" id="features">
+  <div class="inner fade-up">
+    <div class="text-center">
+      <div class="eyebrow">Platform Features</div>
+      <div class="section-title">Everything your team needs.<br/><em>Nothing they don't.</em></div>
+      <div class="section-sub">Built from the ground up for BHT workflow — not adapted from generic software.</div>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-tile">
+        <div class="feat-tile-icon blue">📝</div>
+        <div class="feat-tile-title">ABC Behavior Entries</div>
+        <div class="feat-tile-desc">Structured logging for each incident — Antecedent, Behavior, Caregiver Intervention, BHT/TSS Intervention, and Client Response. Collapsible for easy review.</div>
+        <span class="feat-tile-tag tag-core">Core</span>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-tile-icon teal">📋</div>
+        <div class="feat-tile-title">Copy Past Behaviors</div>
+        <div class="feat-tile-desc">Search and copy behavior entries from any previous session directly into today's report. Saves time for recurring behaviors and patterns across sessions.</div>
+        <span class="feat-tile-tag tag-new">Smart</span>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-tile-icon gold">⚙️</div>
+        <div class="feat-tile-title">Per-Staff Configuration</div>
+        <div class="feat-tile-desc">Each BHT configures their own defaults — client name, session type, goals, default interventions, and digital signature. Instant onboarding for new staff.</div>
+        <span class="feat-tile-tag tag-core">Core</span>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-tile-icon blue">🖨</div>
+        <div class="feat-tile-title">One-Click PDF Reports</div>
+        <div class="feat-tile-desc">Professional A4 landscape reports with embedded digital signature, agency branding, and exact form layout. Up to 4 incidents per page, auto-paginated.</div>
+        <span class="feat-tile-tag tag-core">Core</span>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-tile-icon teal">📅</div>
+        <div class="feat-tile-title">Smart Date Automation</div>
+        <div class="feat-tile-desc">Next service date auto-calculates to the next working day (Mon–Fri). Total hours auto-calculate from start and end time. Reduces manual errors significantly.</div>
+        <span class="feat-tile-tag tag-new">Auto</span>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-tile-icon gold">📊</div>
+        <div class="feat-tile-title">Excel & Data Export</div>
+        <div class="feat-tile-desc">Export all session records to structured Excel files with smart merge — existing records are preserved, only new data is added. Full round-trip import supported.</div>
+        <span class="feat-tile-tag tag-core">Core</span>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-tile-icon blue">☁️</div>
+        <div class="feat-tile-title">Cloud Auto-Save</div>
+        <div class="feat-tile-desc">Every field saves automatically as you type. Real-time sync across devices. No manual save needed. Visual indicator shows save status at all times.</div>
+        <span class="feat-tile-tag tag-hipaa">HIPAA</span>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-tile-icon teal">👥</div>
+        <div class="feat-tile-title">Multi-Client Support</div>
+        <div class="feat-tile-desc">Each BHT can document for multiple clients. Supervisor accounts see all staff activity across all clients with role-based access control.</div>
+        <span class="feat-tile-tag tag-new">Enterprise</span>
+      </div>
+      <div class="feat-tile">
+        <div class="feat-tile-icon gold">🔔</div>
+        <div class="feat-tile-title">Dynamic Goals</div>
+        <div class="feat-tile-desc">Add any number of treatment goals per client. Goals auto-populate every session, appear on printed reports, and can be updated anytime from Settings.</div>
+        <span class="feat-tile-tag tag-core">Core</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HIPAA -->
+<div class="full-bleed hipaa-section" id="hipaa">
+  <div class="inner fade-up">
+    <div class="text-center">
+      <div class="eyebrow">Security & Compliance</div>
+      <div class="section-title" style="color:#fff;">Built for <em style="color:var(--gold);">HIPAA compliance</em><br/>from day one</div>
+      <div class="section-sub">Not bolted on. Not an afterthought. Every architectural decision in BHT CareLog was made with HIPAA, HITECH, and healthcare data security requirements at the center.</div>
+    </div>
+    <div class="hipaa-grid">
+      <div class="hipaa-card">
+        <div class="hipaa-card-icon">🔐</div>
+        <div>
+          <div class="hipaa-card-title">End-to-End Encryption</div>
+          <div class="hipaa-card-desc">All Protected Health Information (PHI) is encrypted at rest and in transit using AES-256 and TLS 1.3. No data is ever transmitted or stored in plain text.</div>
+          <div class="hipaa-card-points">
+            <div class="hipaa-point">AES-256 encryption at rest</div>
+            <div class="hipaa-point">TLS 1.3 for all data in transit</div>
+            <div class="hipaa-point">Database-level field encryption for PHI fields</div>
+            <div class="hipaa-point">Encrypted backups with geo-redundancy</div>
+          </div>
+        </div>
+      </div>
+      <div class="hipaa-card">
+        <div class="hipaa-card-icon">🛡️</div>
+        <div>
+          <div class="hipaa-card-title">Access Controls & Authentication</div>
+          <div class="hipaa-card-desc">Role-based access control ensures BHTs only see their own client records. Supervisors and admins have tiered visibility with full audit capability.</div>
+          <div class="hipaa-card-points">
+            <div class="hipaa-point">Multi-factor authentication (MFA) enforced</div>
+            <div class="hipaa-point">Role-based access: BHT / Supervisor / Admin</div>
+            <div class="hipaa-point">Automatic session timeout after inactivity</div>
+            <div class="hipaa-point">Single Sign-On (SSO) support for enterprise</div>
+          </div>
+        </div>
+      </div>
+      <div class="hipaa-card">
+        <div class="hipaa-card-icon">📋</div>
+        <div>
+          <div class="hipaa-card-title">Audit Trail & Logging</div>
+          <div class="hipaa-card-desc">Every action — view, create, edit, export, print, login — is logged with timestamp, user identity, and IP address. Immutable audit logs for compliance reviews.</div>
+          <div class="hipaa-card-points">
+            <div class="hipaa-point">Immutable access logs for all PHI interactions</div>
+            <div class="hipaa-point">Exportable audit reports for compliance review</div>
+            <div class="hipaa-point">Breach detection and automated alerts</div>
+            <div class="hipaa-point">Log retention for minimum 6 years (HIPAA requirement)</div>
+          </div>
+        </div>
+      </div>
+      <div class="hipaa-card">
+        <div class="hipaa-card-icon">📄</div>
+        <div>
+          <div class="hipaa-card-title">Business Associate Agreement (BAA)</div>
+          <div class="hipaa-card-desc">BHT CareLog executes a signed BAA with every customer organization, establishing clear responsibilities for PHI handling as required under HIPAA.</div>
+          <div class="hipaa-card-points">
+            <div class="hipaa-point">Signed BAA provided before go-live</div>
+            <div class="hipaa-point">All subprocessors are BAA-compliant</div>
+            <div class="hipaa-point">Data Processing Agreement (DPA) included</div>
+            <div class="hipaa-point">Annual compliance review process</div>
+          </div>
+        </div>
+      </div>
+      <div class="hipaa-card">
+        <div class="hipaa-card-icon">🌐</div>
+        <div>
+          <div class="hipaa-card-title">Data Residency & Sovereignty</div>
+          <div class="hipaa-card-desc">All PHI is stored exclusively within US-based, HIPAA-eligible cloud infrastructure. No data crosses international borders. Data deletion on request.</div>
+          <div class="hipaa-card-points">
+            <div class="hipaa-point">US-only data residency (AWS GovCloud or Azure Gov)</div>
+            <div class="hipaa-point">Data isolation per organization</div>
+            <div class="hipaa-point">Right to erasure / data deletion on contract end</div>
+            <div class="hipaa-point">No third-party data sharing or advertising</div>
+          </div>
+        </div>
+      </div>
+      <div class="hipaa-card">
+        <div class="hipaa-card-icon">🔄</div>
+        <div>
+          <div class="hipaa-card-title">Backup, Recovery & Availability</div>
+          <div class="hipaa-card-desc">Automated daily backups with point-in-time recovery. 99.9% uptime SLA. Disaster recovery plan with RTO under 4 hours and RPO under 1 hour.</div>
+          <div class="hipaa-card-points">
+            <div class="hipaa-point">Automated daily encrypted backups</div>
+            <div class="hipaa-point">Point-in-time recovery (30-day window)</div>
+            <div class="hipaa-point">99.9% uptime SLA with monitoring</div>
+            <div class="hipaa-point">Documented Disaster Recovery Plan (DRP)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hipaa-cert-row">
+      <div class="hipaa-cert"><div class="hipaa-cert-icon">🏥</div><div><div class="hipaa-cert-label">HIPAA Compliant</div><div class="hipaa-cert-sub">Privacy & Security Rule</div></div></div>
+      <div class="hipaa-cert"><div class="hipaa-cert-icon">🔒</div><div><div class="hipaa-cert-label">SOC 2 Type II</div><div class="hipaa-cert-sub">Security & Availability</div></div></div>
+      <div class="hipaa-cert"><div class="hipaa-cert-icon">📋</div><div><div class="hipaa-cert-label">BAA Ready</div><div class="hipaa-cert-sub">Business Associate Agreement</div></div></div>
+      <div class="hipaa-cert"><div class="hipaa-cert-icon">🌐</div><div><div class="hipaa-cert-label">US Data Residency</div><div class="hipaa-cert-sub">AWS GovCloud / Azure Gov</div></div></div>
+      <div class="hipaa-cert"><div class="hipaa-cert-icon">🛡️</div><div><div class="hipaa-cert-label">MFA Enforced</div><div class="hipaa-cert-sub">Multi-Factor Authentication</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- WORKFLOW -->
+<div class="full-bleed workflow-section">
+  <div class="inner fade-up">
+    <div class="text-center">
+      <div class="eyebrow">How It Works</div>
+      <div class="section-title">A session in <em>5 simple steps</em></div>
+      <div class="section-sub">From arriving at the client's location to a signed, submitted report — all in one flow.</div>
+    </div>
+    <div class="workflow-steps">
+      <div class="wf-step">
+        <div class="wf-num">📅</div>
+        <div class="wf-title">Select Date</div>
+        <div class="wf-desc">Open the app, select today's service date. Existing records load automatically.</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">📋</div>
+        <div class="wf-title">Session Info</div>
+        <div class="wf-desc">Confirm client, session type, time, persons present, location and goals. All pre-filled from settings.</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">📝</div>
+        <div class="wf-title">Log Behaviors</div>
+        <div class="wf-desc">Add each behavioral incident throughout the day with full ABC documentation.</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">✅</div>
+        <div class="wf-title">Complete Summary</div>
+        <div class="wf-desc">At-risk status, how behavior was managed, transfer of skills, and next session plan.</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">🖨</div>
+        <div class="wf-title">Print & Submit</div>
+        <div class="wf-desc">One-click generates a signed PDF report ready for submission or filing.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHO IT'S FOR -->
+<section id="who" class="who-section fade-up">
+  <div class="text-center">
+    <div class="eyebrow">Who It's For</div>
+    <div class="section-title">Built for every organization<br/>with <em>BHT staff</em></div>
+    <div class="section-sub">Whether you run a healthcare agency, a school district, or an ABA therapy center — if you have Behavior Health Technicians on staff, BHT CareLog was built for you.</div>
+  </div>
+  <div class="who-grid">
+    <div class="who-card blue">
+      <div class="who-card-icon">🏥</div>
+      <div class="who-card-title">Healthcare Agencies</div>
+      <div class="who-card-desc">Multi-staff behavioral health organizations providing in-home and community-based BHT services.</div>
+      <div class="who-card-points">
+        <div class="who-point"><div class="who-point-dot"></div>Multi-staff documentation in one platform</div>
+        <div class="who-point"><div class="who-point-dot"></div>Supervisor real-time visibility</div>
+        <div class="who-point"><div class="who-point-dot"></div>Billing-ready report formats</div>
+        <div class="who-point"><div class="who-point-dot"></div>HIPAA-compliant from day one</div>
+      </div>
+    </div>
+    <div class="who-card teal">
+      <div class="who-card-icon">🏫</div>
+      <div class="who-card-title">School Districts</div>
+      <div class="who-card-desc">Districts placing BHTs in classrooms to support students with behavioral and developmental needs.</div>
+      <div class="who-card-points">
+        <div class="who-point"><div class="who-point-dot"></div>School-specific location & session tracking</div>
+        <div class="who-point"><div class="who-point-dot"></div>Teacher & educator coordination fields</div>
+        <div class="who-point"><div class="who-point-dot"></div>IEP-aligned goal documentation</div>
+        <div class="who-point"><div class="who-point-dot"></div>District-level reporting dashboard</div>
+      </div>
+    </div>
+    <div class="who-card gold">
+      <div class="who-card-icon">🧩</div>
+      <div class="who-card-title">ABA Therapy Centers</div>
+      <div class="who-card-desc">Applied Behavior Analysis centers with multiple therapists documenting daily client sessions and behaviors.</div>
+      <div class="who-card-points">
+        <div class="who-point"><div class="who-point-dot"></div>ABA-specific behavior intervention logging</div>
+        <div class="who-point"><div class="who-point-dot"></div>Dynamic treatment goal management</div>
+        <div class="who-point"><div class="who-point-dot"></div>Session-to-session behavior tracking</div>
+        <div class="who-point"><div class="who-point-dot"></div>Insurance & Medicaid billing support</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<div class="full-bleed compare-section">
+  <div class="inner fade-up">
+    <div class="text-center">
+      <div class="eyebrow">Why BHT CareLog</div>
+      <div class="section-title">vs. what you're<br/>using <em>today</em></div>
+      <div class="section-sub">See how BHT CareLog stacks up against the manual methods most agencies are still using.</div>
+    </div>
+    <div class="compare-table">
+      <div class="compare-header">
+        <div class="compare-col-head">Feature / Capability</div>
+        <div class="compare-col-head highlight">BHT CareLog</div>
+        <div class="compare-col-head">Paper Forms</div>
+        <div class="compare-col-head">Excel / Spreadsheet</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">HIPAA Compliant</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Encrypted data storage</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Audit trail for all actions</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Digital staff signature</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Auto-save & cloud backup</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="partial">Partial</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">One-click PDF reports</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="partial">Manual</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Supervisor real-time visibility</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Copy past behaviors</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Dynamic treatment goals</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="partial">Manual</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Business Associate Agreement</div>
+        <div class="compare-cell highlight"><span class="check">✓</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+        <div class="compare-cell"><span class="cross">✗</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feature">Risk of data loss</div>
+        <div class="compare-cell highlight" style="color:#34D399;font-weight:600;">None</div>
+        <div class="compare-cell" style="color:var(--danger);font-weight:600;">Very High</div>
+        <div class="compare-cell" style="color:var(--warn);font-weight:600;">High</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="full-bleed tech-section">
+  <div class="inner fade-up">
+    <div class="text-center">
+      <div class="eyebrow">Architecture</div>
+      <div class="section-title">Production-grade.<br/><em>Enterprise-ready.</em></div>
+      <div class="section-sub">Built on proven, HIPAA-eligible cloud infrastructure with security and scalability at every layer.</div>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-block">
+        <div class="tech-block-title"><div class="tech-block-icon blue">☁️</div>Cloud Infrastructure</div>
+        <div class="tech-items">
+          <div class="tech-item"><div class="tech-item-label">AWS GovCloud / Azure Gov</div><span class="tech-badge tb-hipaa">HIPAA-Eligible</span></div>
+          <div class="tech-item"><div class="tech-item-label">Auto-scaling compute</div><span class="tech-badge tb-cloud">99.9% Uptime</span></div>
+          <div class="tech-item"><div class="tech-item-label">Multi-region redundancy</div><span class="tech-badge tb-hipaa">DR Ready</span></div>
+          <div class="tech-item"><div class="tech-item-label">CDN for fast global access</div><span class="tech-badge tb-cloud">Edge Cached</span></div>
+        </div>
+      </div>
+      <div class="tech-block">
+        <div class="tech-block-title"><div class="tech-block-icon teal">🔐</div>Security Layer</div>
+        <div class="tech-items">
+          <div class="tech-item"><div class="tech-item-label">AES-256 encryption at rest</div><span class="tech-badge tb-enc">HIPAA §164</span></div>
+          <div class="tech-item"><div class="tech-item-label">TLS 1.3 in transit</div><span class="tech-badge tb-enc">Encrypted</span></div>
+          <div class="tech-item"><div class="tech-item-label">Web Application Firewall</div><span class="tech-badge tb-hipaa">Protected</span></div>
+          <div class="tech-item"><div class="tech-item-label">Penetration testing (annual)</div><span class="tech-badge tb-enc">Verified</span></div>
+        </div>
+      </div>
+      <div class="tech-block">
+        <div class="tech-block-title"><div class="tech-block-icon gold">🗄️</div>Data Layer</div>
+        <div class="tech-items">
+          <div class="tech-item"><div class="tech-item-label">Encrypted relational database</div><span class="tech-badge tb-hipaa">PHI Safe</span></div>
+          <div class="tech-item"><div class="tech-item-label">Automated daily backups</div><span class="tech-badge tb-cloud">30-day RPO</span></div>
+          <div class="tech-item"><div class="tech-item-label">Point-in-time recovery</div><span class="tech-badge tb-cloud">PITR</span></div>
+          <div class="tech-item"><div class="tech-item-label">Immutable audit log store</div><span class="tech-badge tb-hipaa">6yr Retention</span></div>
+        </div>
+      </div>
+      <div class="tech-block">
+        <div class="tech-block-title"><div class="tech-block-icon green">👤</div>Identity & Access</div>
+        <div class="tech-items">
+          <div class="tech-item"><div class="tech-item-label">Multi-factor authentication</div><span class="tech-badge tb-hipaa">MFA Required</span></div>
+          <div class="tech-item"><div class="tech-item-label">Role-based access control</div><span class="tech-badge tb-enc">RBAC</span></div>
+          <div class="tech-item"><div class="tech-item-label">Single Sign-On (SAML 2.0)</div><span class="tech-badge tb-cloud">Enterprise SSO</span></div>
+          <div class="tech-item"><div class="tech-item-label">Session timeout & token refresh</div><span class="tech-badge tb-hipaa">Auto-Expire</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROI -->
+<div class="full-bleed roi-section">
+  <div class="inner fade-up">
+    <div class="text-center">
+      <div class="eyebrow">Business Impact</div>
+      <div class="section-title" style="color:#fff;">The numbers speak<br/><em style="color:var(--gold);">for themselves</em></div>
+      <div class="section-sub">Based on projected outcomes for a typical 10-BHT agency using BHT CareLog vs. paper-based documentation.</div>
+    </div>
+    <div class="roi-grid">
+      <div class="roi-card">
+        <div class="roi-num">75%</div>
+        <div class="roi-label">Less time on documentation</div>
+        <div class="roi-desc">BHTs spend 75% less time on daily reports, freeing hours for direct client care.</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-num">$0</div>
+        <div class="roi-label">HIPAA violation risk cost</div>
+        <div class="roi-desc">Average HIPAA penalty: $100–$50,000 per violation. CareLog eliminates that exposure entirely.</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-num">100%</div>
+        <div class="roi-label">Report accuracy rate</div>
+        <div class="roi-desc">Structured forms with required fields mean no missing data, no illegible handwriting, no billing rejections.</div>
+      </div>
+      <div class="roi-card">
+        <div class="roi-num">Real-time</div>
+        <div class="roi-label">Supervisor oversight</div>
+        <div class="roi-desc">Supervisors see every session note the moment it's saved — not days later when the paper arrives.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DEPLOYMENT -->
+<section id="deployment" class="deploy-section fade-up">
+  <div class="text-center">
+    <div class="eyebrow">Deployment Options</div>
+    <div class="section-title">Flexible for every<br/><em>organization size</em></div>
+    <div class="section-sub">From a single-location clinic to a multi-site school district — BHT CareLog scales with you.</div>
+  </div>
+  <div class="deploy-grid">
+    <div class="deploy-card">
+      <div class="deploy-title">Starter</div>
+      <div class="deploy-sub">Small agencies & solo BHT practices</div>
+      <div class="deploy-points">
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Up to 5 BHT staff accounts</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Unlimited session documentation</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>PDF report generation</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Excel export & import</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>HIPAA-compliant storage</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>BAA included</div>
+      </div>
+      <button class="deploy-btn outline">Contact Sales</button>
+    </div>
+    <div class="deploy-card featured">
+      <div class="deploy-featured-badge">Most Popular</div>
+      <div class="deploy-title">Professional</div>
+      <div class="deploy-sub">Growing agencies & school districts</div>
+      <div class="deploy-points">
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Up to 25 BHT staff accounts</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Supervisor dashboard & oversight</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Multi-client management</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Audit log access</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Priority support & onboarding</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>SSO integration</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Custom form branding</div>
+      </div>
+      <button class="deploy-btn primary">Contact Sales</button>
+    </div>
+    <div class="deploy-card">
+      <div class="deploy-title">Enterprise</div>
+      <div class="deploy-sub">Large health networks & districts</div>
+      <div class="deploy-points">
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Unlimited staff accounts</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>On-premise or private cloud option</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Custom EHR/EMR integrations</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Dedicated compliance officer</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Custom SLA & uptime guarantee</div>
+        <div class="deploy-point"><span class="deploy-point-check">✓</span>Annual penetration testing report</div>
+      </div>
+      <button class="deploy-btn outline">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section fade-up">
+  <div class="cta-title">Ready to transform your<br/><em>BHT documentation?</em></div>
+  <div class="cta-sub">Join healthcare agencies, school districts, and ABA centers that are replacing paper and spreadsheets with BHT CareLog.</div>
+  <div class="cta-actions">
+    <button class="btn-white">Schedule a Demo →</button>
+    <button class="btn-white-outline">Download Overview PDF</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">BHT <span>CareLog</span></div>
+  <div class="footer-text">HIPAA-Compliant · SOC 2 Type II · US Data Residency · BAA Available · © 2026 BHT CareLog. All rights reserved.</div>
+</footer>
+
+<script>
+// Scroll animations
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.12});
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// Smooth scroll for nav
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const el = document.querySelector(a.getAttribute('href'));
+    if(el) el.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>
