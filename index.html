@@ -2,697 +2,918 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>BHT Daily Report – Omni Health Services</title>
-<!-- Microsoft Authentication Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-authentication-library/2.38.3/msal-browser.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BHT Daily Report – Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;1,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 :root{
-  --bg:#F7F6F2;--surface:#fff;--surface2:#F0EEE9;
-  --ink:#1A1917;--ink2:#6B6860;--ink3:#A09D96;
+  --ink:#1A1917;--ink2:#4A4845;--ink3:#9A9690;
+  --bg:#F8F6F1;--surface:#FFFFFF;--border:#E4E0D8;
   --accent:#2563EB;--accent-light:#EFF4FF;
-  --danger:#DC2626;--danger-light:#FEF2F2;
-  --success:#16A34A;--success-light:#F0FDF4;
-  --warn:#D97706;--warn-light:#FFFBEB;
-  --border:#E4E2DC;--border2:#CCC9C0;
-  --radius:12px;--radius-sm:8px;
-  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --success:#16A34A;--warn:#D97706;
+  --tag-bg:#1A1917;--tag-text:#F8F6F1;
+  --sidebar:#1A1917;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.5;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;}
 
-/* LOGIN */
-.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px;}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08);}
-.login-logo{width:56px;height:56px;background:var(--ink);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:22px;}
-.login-title{font-size:22px;font-weight:600;margin-bottom:6px;}
-.login-sub{font-size:14px;color:var(--ink2);margin-bottom:28px;line-height:1.6;}
-.ms-btn{width:100%;padding:13px;background:#fff;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
-.ms-btn:hover{background:var(--surface2);border-color:var(--accent);}
-.login-note{font-size:12px;color:var(--ink3);margin-top:16px;line-height:1.6;}
+/* LAYOUT */
+.doc-wrapper{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
 
-/* HEADER */
-.header{background:var(--ink);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.header-org{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;opacity:.55;}
-.header-title{font-size:16px;font-weight:600;}
-.header-right{display:flex;gap:8px;align-items:center;}
-.user-pill{font-size:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:5px 10px;border-radius:99px;display:flex;align-items:center;gap:6px;}
-.user-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;flex-shrink:0;}
+/* SIDEBAR */
+.sidebar{background:var(--sidebar);color:#fff;padding:0;position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-thumb{background:#444;}
+.sidebar-brand{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sidebar-brand-title{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:#fff;line-height:1.2;}
+.sidebar-brand-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
+.sidebar-version{display:inline-block;background:var(--accent);color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;margin-top:8px;}
+.sidebar-nav{padding:16px 0;}
+.nav-section{padding:8px 24px 4px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 24px;font-size:13px;color:rgba(255,255,255,.65);cursor:pointer;transition:all .15s;text-decoration:none;border-left:3px solid transparent;}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.nav-item.active{background:rgba(37,99,235,.25);color:#fff;border-left-color:var(--accent);}
+.nav-item .icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
 
-/* BUTTONS */
-button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none;background:none;font-size:14px;}
-.btn{padding:9px 16px;border-radius:var(--radius-sm);font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
-.btn-primary{background:var(--accent);color:#fff;}
-.btn-primary:hover{background:#1d4ed8;}
-.btn-primary:disabled{background:#93C5FD;cursor:not-allowed;}
-.btn-ghost{background:transparent;color:var(--ink2);border:1px solid var(--border2);}
-.btn-ghost:hover{background:var(--surface2);}
-.btn-success{background:var(--success);color:#fff;}
-.btn-success:hover{background:#15803d;}
-.btn-success:disabled{background:#86EFAC;cursor:not-allowed;}
-.btn-sm{padding:6px 12px;font-size:13px;}
-.btn-print{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);padding:7px 14px;border-radius:var(--radius-sm);font-weight:500;font-size:13px;}
-.btn-print:hover{background:rgba(255,255,255,.25);}
+/* MAIN */
+.main{padding:0;max-width:900px;}
+.hero{background:var(--ink);color:#fff;padding:56px 56px 48px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(37,99,235,.3) 0%,transparent 70%);pointer-events:none;}
+.hero-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:12px;}
+.hero-title{font-family:'Fraunces',serif;font-size:42px;font-weight:700;line-height:1.1;margin-bottom:16px;}
+.hero-title em{font-style:italic;color:rgba(255,255,255,.5);}
+.hero-desc{font-size:16px;color:rgba(255,255,255,.65);max-width:520px;line-height:1.6;}
+.hero-meta{display:flex;gap:24px;margin-top:28px;flex-wrap:wrap;}
+.hero-meta-item{font-size:12px;color:rgba(255,255,255,.45);}
+.hero-meta-item strong{display:block;font-size:15px;color:#fff;font-weight:600;}
 
-/* TABS */
-.tab-bar{background:var(--surface);border-bottom:1px solid var(--border);display:flex;padding:0 16px;overflow-x:auto;scrollbar-width:none;}
-.tab-bar::-webkit-scrollbar{display:none;}
-.tab{padding:12px 16px;font-size:13px;font-weight:500;color:var(--ink3);border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer;transition:all .15s;}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.tab:hover:not(.active){color:var(--ink2);}
+/* CONTENT */
+.content{padding:48px 56px;}
+.section{margin-bottom:64px;scroll-margin-top:24px;}
+.section-eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.section-title{font-family:'Fraunces',serif;font-size:30px;font-weight:700;color:var(--ink);margin-bottom:6px;line-height:1.2;}
+.section-desc{font-size:15px;color:var(--ink2);margin-bottom:28px;line-height:1.6;max-width:640px;}
+.divider{height:1px;background:var(--border);margin-bottom:40px;}
 
-/* VIEWS */
-.view{display:none;padding:16px;max-width:680px;margin:0 auto;}
-.view.active{display:block;}
+/* SCREEN MOCKUPS */
+.screen-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:24px;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+.screen-bar{background:#F0EEE9;padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.screen-dot{width:10px;height:10px;border-radius:50%;}
+.screen-dot.r{background:#FF5F57;}
+.screen-dot.y{background:#FEBC2E;}
+.screen-dot.g{background:#28C840;}
+.screen-url{flex:1;background:#fff;border-radius:6px;padding:5px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);margin:0 8px;}
+.screen-body{padding:0;}
 
-/* CARDS */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
-.card-title{font-size:13px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-.card-title .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;}
+/* APP UI MOCKUPS */
+.app-header{background:#1A1917;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+.app-header-left .org{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;opacity:.5;}
+.app-header-left .title{font-size:15px;font-weight:600;}
+.app-pill{font-size:11px;padding:4px 10px;border-radius:99px;font-weight:500;}
+.pill-saved{background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.4);color:#4ADE80;}
+.pill-new{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.55);}
 
-/* FORM */
-label{font-size:13px;color:var(--ink2);font-weight:500;display:block;margin-bottom:4px;}
-input[type=text],input[type=date],input[type=time],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--bg);transition:border .15s,box-shadow .15s;outline:none;-webkit-appearance:none;appearance:none;}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);background:#fff;}
-textarea{resize:vertical;min-height:80px;}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6860' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
-.field{margin-bottom:12px;}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.app-datebar{background:#fff;border-bottom:2px solid #2563EB;padding:10px 16px;display:flex;align-items:center;gap:10px;}
+.app-datebar label{font-size:12px;font-weight:600;color:#6B6860;}
+.app-dateinput{flex:1;padding:8px 12px;border:2px solid #2563EB;border-radius:8px;font-size:14px;font-weight:600;color:#1A1917;background:#EFF4FF;}
+.app-btn-load{padding:8px 14px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
 
-/* PILLS */
-.check-group{display:flex;flex-wrap:wrap;gap:8px;}
-.check-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border2);border-radius:99px;font-size:13px;cursor:pointer;transition:all .15s;user-select:none;background:var(--bg);}
-.check-pill input{display:none;}
-.check-pill.checked{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:500;}
+.app-tabs{background:#fff;border-bottom:1px solid #E4E2DC;display:flex;overflow-x:auto;}
+.app-tab{padding:10px 16px;font-size:12px;font-weight:500;color:#A09D96;border-bottom:3px solid transparent;white-space:nowrap;}
+.app-tab.active{color:#2563EB;border-bottom-color:#2563EB;font-weight:600;}
 
-/* ENTRIES */
-.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow);}
-.entry-header{background:var(--surface2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;}
-.entry-num{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.entry-time{font-family:'DM Mono',monospace;font-size:12px;background:var(--border);padding:2px 8px;border-radius:4px;}
-.entry-delete{color:var(--danger);font-size:18px;line-height:1;padding:2px 6px;border-radius:4px;}
-.entry-delete:hover{background:var(--danger-light);}
-.entry-body{padding:14px;}
-.entry-preview{font-size:12px;color:var(--ink3);padding:4px 14px 10px;}
-.goal-tag{font-size:10px;font-weight:600;letter-spacing:.04em;padding:3px 8px;border-radius:99px;text-transform:uppercase;}
-.goal-1{background:#EEF2FF;color:#4338CA;}
-.goal-2{background:#F0FDF4;color:#166534;}
-.goal-3{background:#FEF2F2;color:#991B1B;}
-.add-entry-btn{width:100%;padding:14px;border:2px dashed var(--border2);border-radius:var(--radius);background:transparent;color:var(--ink2);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .15s;margin-bottom:12px;}
-.add-entry-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+.app-save-bar{background:#fff;border-bottom:1px solid #E4E2DC;padding:8px 16px;display:flex;align-items:center;gap:10px;}
+.app-save-btn{flex:1;padding:9px;background:#16A34A;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;text-align:center;}
+
+.app-body{padding:16px;background:#F8F6F1;}
+.app-card{background:#fff;border:1px solid #E4E2DC;border-radius:12px;padding:14px;margin-bottom:10px;}
+.app-card-title{font-size:11px;font-weight:600;color:#6B6860;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.app-dot{width:6px;height:6px;border-radius:50%;background:#2563EB;display:inline-block;}
+.app-field{margin-bottom:10px;}
+.app-field label{font-size:12px;color:#6B6860;font-weight:500;display:block;margin-bottom:3px;}
+.app-input{width:100%;padding:9px 11px;border:1px solid #CCC9C0;border-radius:8px;font-size:13px;color:#1A1917;background:#F8F6F1;}
+.app-pills{display:flex;flex-wrap:wrap;gap:6px;}
+.app-chip{padding:6px 12px;border:1px solid #CCC9C0;border-radius:99px;font-size:12px;background:#F8F6F1;color:#6B6860;}
+.app-chip.on{background:#EFF4FF;border-color:#2563EB;color:#2563EB;font-weight:500;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ENTRY CARD */
+.entry-card{background:#fff;border:1px solid #E4E2DC;border-radius:12px;margin-bottom:10px;overflow:hidden;}
+.entry-header{background:#F0EEE9;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #E4E2DC;}
+.entry-num{font-size:11px;font-weight:600;color:#6B6860;letter-spacing:.06em;display:flex;align-items:center;gap:8px;}
+.entry-time-badge{font-family:'DM Mono',monospace;font-size:11px;background:#E4E2DC;padding:2px 8px;border-radius:4px;}
+.entry-body{padding:12px;}
+.entry-body .app-field:last-child{margin-bottom:0;}
+
+/* ADD BUTTONS */
+.add-btns{display:flex;gap:8px;margin-bottom:12px;}
+.btn-new{flex:1;padding:12px;border:2px dashed #CCC9C0;border-radius:12px;background:transparent;color:#6B6860;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-copy{flex:1;padding:12px;border:2px dashed #2563EB;border-radius:12px;background:transparent;color:#2563EB;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;}
+
+/* PAST MODAL MOCKUP */
+.modal-mock{background:#fff;border-radius:16px 16px 0 0;padding:0;overflow:hidden;border:1px solid #E4E2DC;}
+.modal-mock-header{padding:14px 16px;border-bottom:1px solid #E4E2DC;display:flex;justify-content:space-between;align-items:flex-start;}
+.modal-mock-title{font-size:14px;font-weight:700;}
+.modal-mock-sub{font-size:11px;color:#9A9690;margin-top:2px;}
+.modal-toolbar{padding:10px 16px;border-bottom:1px solid #E4E2DC;display:flex;gap:8px;}
+.modal-search{flex:1;padding:7px 12px;border:1px solid #CCC9C0;border-radius:8px;font-size:12px;color:#9A9690;}
+.modal-filter{padding:7px 12px;border:1px solid #CCC9C0;border-radius:8px;font-size:12px;color:#6B6860;}
+.modal-body-inner{padding:14px;}
+.pbh-date-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#9A9690;margin-bottom:8px;}
+.pbh-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pbh-card{border:2px solid #E4E2DC;border-radius:10px;padding:10px;cursor:pointer;}
+.pbh-card.sel{border-color:#2563EB;background:#EFF4FF;}
+.pbh-beh{font-size:12px;font-weight:600;color:#1A1917;margin-bottom:5px;}
+.pbh-meta{display:flex;gap:5px;flex-wrap:wrap;}
+.pbh-tag{font-size:10px;background:#F0EEE9;border-radius:4px;padding:2px 6px;}
+.pbh-check{width:18px;height:18px;border-radius:50%;border:2px solid #E4E2DC;display:inline-flex;align-items:center;justify-content:center;font-size:10px;float:right;margin-left:4px;}
+.pbh-check.on{background:#2563EB;border-color:#2563EB;color:#fff;}
+.modal-footer{padding:12px 16px;border-top:1px solid #E4E2DC;display:flex;gap:8px;}
+.btn-cancel{padding:10px 16px;background:#F0EEE9;color:#6B6860;border:1px solid #CCC9C0;border-radius:8px;font-size:13px;}
+.btn-import-modal{flex:1;padding:10px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;text-align:center;}
 
 /* SUMMARY */
-.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #E4E2DC;font-size:13px;}
 .summary-row:last-child{border-bottom:none;}
-.summary-label{color:var(--ink2);}
-.summary-value{font-weight:500;}
-.badge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;}
-.badge-ok{background:var(--success-light);color:var(--success);}
-.badge-warn{background:var(--warn-light);color:var(--warn);}
+.badge-ok{background:#F0FDF4;color:#16A34A;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600;}
+.badge-warn{background:#FFFBEB;color:#D97706;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600;}
 
-/* RECORDS */
-.record-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .15s;}
-.record-row:hover{border-color:var(--accent);background:var(--accent-light);}
-.record-client{font-weight:600;font-size:14px;}
-.record-meta{font-size:12px;color:var(--ink3);margin-top:2px;}
+/* ALL REPORTS */
+.report-row{background:#fff;border:1px solid #E4E2DC;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.report-client{font-weight:600;font-size:13px;}
+.report-meta{font-size:11px;color:#9A9690;margin-top:2px;}
+.report-btns{display:flex;gap:6px;}
+.btn-sm-doc{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:500;border:1px solid #CCC9C0;background:#fff;color:#6B6860;}
+.btn-sm-doc.acc{background:#EFF4FF;color:#2563EB;border-color:#2563EB;}
+.btn-sm-doc.dan{background:#FEF2F2;color:#DC2626;border-color:#DC2626;}
+.btn-sm-doc.suc{background:#F0FDF4;color:#16A34A;border-color:#16A34A;}
+.export-row{display:flex;gap:8px;margin-bottom:14px;}
+.export-btn{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid;display:flex;align-items:center;gap:6px;}
 
-/* STATUS */
-.status-banner{padding:12px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
-.status-saving{background:var(--warn-light);color:var(--warn);border:1px solid #FDE68A;}
-.status-saved{background:var(--success-light);color:var(--success);border:1px solid #BBF7D0;}
-.status-error{background:var(--danger-light);color:var(--danger);border:1px solid #FECACA;}
+/* PRINT PREVIEW */
+.print-preview{background:#fff;padding:20px;font-size:11px;}
+.pv-org{text-align:center;font-size:14px;font-weight:700;margin-bottom:2px;}
+.pv-sub{text-align:center;font-size:12px;font-weight:600;margin-bottom:10px;}
+.pv-meta{border:1px solid #ccc;padding:8px;border-radius:4px;font-size:10px;margin-bottom:8px;}
+.pv-table{width:100%;border-collapse:collapse;font-size:10px;}
+.pv-table th{background:#f5f5f5;border:1px solid #ccc;padding:4px;text-align:center;font-size:9px;}
+.pv-table td{border:1px solid #ccc;padding:5px;vertical-align:top;}
+.pv-footer{margin-top:8px;font-size:10px;}
+.pv-line{border-bottom:1px solid #000;display:inline-block;min-width:80px;}
 
-/* DRAFT BANNER */
-.draft-banner{background:#FFFBEB;border:1px solid #FCD34D;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:#92400E;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;}
+/* SETTINGS */
+.cfg-section{background:#fff;border:1px solid #E4E2DC;border-radius:12px;padding:14px;margin-bottom:10px;}
+.cfg-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6B6860;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.goal-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.goal-num{font-size:11px;font-weight:600;color:#9A9690;min-width:24px;}
+.goal-input{flex:1;padding:8px 11px;border:1px solid #CCC9C0;border-radius:8px;font-size:12px;background:#F8F6F1;}
+.btn-del{width:28px;height:28px;border-radius:50%;border:none;background:#FEF2F2;color:#DC2626;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.btn-add-goal-doc{width:100%;padding:9px;border:2px dashed #CCC9C0;border-radius:8px;background:transparent;color:#6B6860;font-size:12px;text-align:center;margin-top:4px;}
+.sig-zone{border:2px dashed #CCC9C0;border-radius:10px;padding:14px;text-align:center;font-size:12px;color:#9A9690;margin-top:8px;}
+.btn-save-cfg{width:100%;padding:12px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;text-align:center;margin-top:4px;}
 
-/* PRINT */
-.print-container{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;font-size:13px;color:#000;margin-bottom:16px;}
-.print-header{text-align:center;margin-bottom:12px;}
-.print-org{font-size:16px;font-weight:700;}
-.print-subtitle{font-size:14px;font-weight:600;}
-.print-meta{border:1px solid #ccc;padding:8px 10px;border-radius:4px;margin-bottom:10px;font-size:12px;}
-.print-meta-row{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:4px;}
-.print-meta-row:last-child{margin-bottom:0;}
-.pm-field{display:flex;gap:6px;}
-.pm-label{font-weight:600;}
-table.bt{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px;}
-table.bt th{background:#f5f5f5;border:1px solid #ccc;padding:5px 6px;text-align:center;font-weight:600;font-size:10px;}
-table.bt td{border:1px solid #ccc;padding:5px 6px;vertical-align:top;}
-.pfs{border:1px solid #ccc;padding:8px 10px;border-radius:4px;margin-bottom:8px;font-size:12px;}
-.pfr{margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap;}
-.pfr:last-child{margin-bottom:0;}
-.psig{margin-top:8px;padding-top:8px;border-top:1px solid #ccc;font-size:11px;font-style:italic;color:#555;}
+/* FEATURE CARDS */
+.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.feat-icon{font-size:24px;margin-bottom:10px;}
+.feat-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.feat-desc{font-size:13px;color:var(--ink2);line-height:1.5;}
 
-.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.hint{font-size:12px;color:var(--ink3);margin-top:4px;}
-.section-label{font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
-.entry-count{font-size:12px;color:var(--ink3);font-family:'DM Mono',monospace;}
-.empty-state{text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;}
-.empty-icon{font-size:32px;margin-bottom:8px;}
+/* STEP LIST */
+.steps{counter-reset:step;}
+.step{display:flex;gap:16px;margin-bottom:20px;counter-increment:step;}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.step-num::before{content:counter(step);}
+.step-body{padding-top:4px;}
+.step-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.step-desc{font-size:13px;color:var(--ink2);line-height:1.5;}
 
-@media(max-width:400px){.field-row{grid-template-columns:1fr;}}
+/* INFO BOXES */
+.info-box{border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
+.info-box.tip{background:#EFF4FF;border:1px solid #BFDBFE;}
+.info-box.warn{background:#FFFBEB;border:1px solid #FDE68A;}
+.info-box.note{background:#F0FDF4;border:1px solid #BBF7D0;}
+.info-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.info-text{font-size:13px;color:var(--ink2);line-height:1.5;}
+.info-text strong{color:var(--ink);}
+
+/* TAG */
+.tag{display:inline-block;background:var(--tag-bg);color:var(--tag-text);font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.06em;text-transform:uppercase;margin-right:4px;}
+.tag.blue{background:#2563EB;}
+.tag.green{background:#16A34A;}
+.tag.amber{background:#D97706;}
+
+/* TABLE */
+.doc-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;}
+.doc-table th{background:#F0EEE9;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;color:var(--ink2);border-bottom:2px solid var(--border);}
+.doc-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--ink2);vertical-align:top;}
+.doc-table tr:last-child td{border-bottom:none;}
+
+/* PRINT LAYOUT DIAGRAM */
+.layout-diagram{display:grid;gap:8px;margin:16px 0;}
+.layout-page{border:2px solid var(--border);border-radius:8px;padding:12px;background:#fff;}
+.layout-page-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;}
+.layout-row{height:20px;border-radius:4px;margin-bottom:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:600;}
+.layout-row.header{background:#1A1917;color:#fff;}
+.layout-row.meta{background:#E4E0D8;color:#6B6860;}
+.layout-row.incident{background:#EFF4FF;color:#2563EB;}
+.layout-row.footer{background:#F0FDF4;color:#16A34A;}
+
 @media print{
-  body{background:#fff;}
-  .header,.tab-bar,.view:not(#view-print),.add-entry-btn,.btn,.toast,.no-print,#login-screen{display:none!important;}
-  #main-app{display:block!important;}
-  #view-print{display:block!important;padding:0;}
-  .print-container{border:none;padding:0;}
+  .sidebar{display:none;}
+  .doc-wrapper{grid-template-columns:1fr;}
+  .hero{print-color-adjust:exact;}
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="login-screen">
-  <div class="login-card">
-    <div class="login-logo">📋</div>
-    <div class="login-title">BHT Daily Report</div>
-    <div class="login-sub">Omni Health Services<br/>Sign in with your Microsoft work account to save reports to SharePoint.</div>
-    <button class="ms-btn" id="login-btn" onclick="signIn()">
-      <svg width="20" height="20" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-        <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-        <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
-        <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
-        <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-      </svg>
-      Sign in with Microsoft
-    </button>
-    <p class="login-note">Your data saves securely to Omni Health Services SharePoint.<br/>No external servers. HIPAA-safe Microsoft 365 environment.</p>
+<div class="doc-wrapper">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-title">BHT Daily Report</div>
+    <div class="sidebar-brand-sub">ABC Health Services</div>
+    <span class="sidebar-version">v2.0 Documentation</span>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a class="nav-item active" href="#overview"><span class="icon">📋</span>Introduction</a>
+    <a class="nav-item" href="#features"><span class="icon">✨</span>Feature Summary</a>
+    <a class="nav-item" href="#getting-started"><span class="icon">🚀</span>Getting Started</a>
+
+    <div class="nav-section">Screens</div>
+    <a class="nav-item" href="#session-info"><span class="icon">📅</span>Session Info</a>
+    <a class="nav-item" href="#behaviors"><span class="icon">📝</span>Behaviors</a>
+    <a class="nav-item" href="#copy-past"><span class="icon">📋</span>Copy Past Behaviors</a>
+    <a class="nav-item" href="#summary"><span class="icon">📊</span>Summary</a>
+    <a class="nav-item" href="#all-reports"><span class="icon">🗂</span>All Reports</a>
+    <a class="nav-item" href="#print"><span class="icon">🖨</span>Print / Save PDF</a>
+    <a class="nav-item" href="#settings"><span class="icon">⚙️</span>Settings</a>
+
+    <div class="nav-section">Data & Export</div>
+    <a class="nav-item" href="#export-local"><span class="icon">📤</span>Export to Local</a>
+    <a class="nav-item" href="#import-local"><span class="icon">📥</span>Import from Local</a>
+    <a class="nav-item" href="#autosave"><span class="icon">💾</span>Auto-Save</a>
+
+    <div class="nav-section">Reference</div>
+    <a class="nav-item" href="#pagination"><span class="icon">📄</span>Print Pagination</a>
+    <a class="nav-item" href="#fields"><span class="icon">🗃</span>Field Reference</a>
+    <a class="nav-item" href="#tips"><span class="icon">💡</span>Tips & FAQ</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- HERO -->
+<div class="hero" id="overview">
+  <div class="hero-label">Documentation</div>
+  <div class="hero-title">BHT Daily Report<br/><em>User Guide</em></div>
+  <div class="hero-desc">A complete single-file web application for Behavior Health Technicians to document, save, and print daily session reports for ABC Health Services.</div>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><strong>ABC Health Services</strong>Organization</div>
+    <div class="hero-meta-item"><strong>Default Staff</strong>Default Staff</div>
+    <div class="hero-meta-item"><strong>Offline-Ready</strong>No internet needed</div>
+    <div class="hero-meta-item"><strong>Single HTML File</strong>No installation</div>
   </div>
 </div>
 
-<!-- MAIN APP -->
-<div id="main-app" style="display:none;">
-  <div class="header">
-    <div>
-      <div class="header-org">Omni Health Services</div>
-      <div class="header-title">BHT Daily Report</div>
-    </div>
-    <div class="header-right">
-      <div class="user-pill"><span class="user-dot"></span><span id="user-name">...</span></div>
-      <button class="btn-print" onclick="openPrint()">🖨 Print</button>
-    </div>
-  </div>
+<div class="content">
 
-  <div class="tab-bar">
-    <div class="tab active" onclick="switchTab('info')" id="tab-info">Session Info</div>
-    <div class="tab" onclick="switchTab('behaviors')" id="tab-behaviors">Behaviors <span id="entry-badge"></span></div>
-    <div class="tab" onclick="switchTab('summary')" id="tab-summary">Summary & Save</div>
-    <div class="tab" onclick="switchTab('records')" id="tab-records">Past Reports</div>
-    <div class="tab" onclick="switchTab('print')" id="tab-print">Print</div>
-  </div>
-
-  <!-- SESSION INFO -->
-  <div class="view active" id="view-info">
-    <div id="draft-banner"></div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Session type</div>
-      <div class="check-group">
-        <label class="check-pill checked" onclick="togglePill(this,'sessionType','in-person')"><input type="radio" name="sessionType" value="in-person" checked/>✓ In person</label>
-        <label class="check-pill" onclick="togglePill(this,'sessionType','telehealth')"><input type="radio" name="sessionType" value="telehealth"/>Telehealth</label>
-        <label class="check-pill" onclick="togglePill(this,'sessionType','audio')"><input type="radio" name="sessionType" value="audio"/>Audio Only</label>
-      </div>
-      <div id="audio-ph" style="display:none;margin-top:10px;">
-        <div class="field"><label>Phone number</label><input type="text" id="audioPh" placeholder="Phone number" oninput="autoDraft()"/></div>
-        <div class="field"><label>Reason for Audio Only</label><input type="text" id="audioReason" placeholder="Reason..." oninput="autoDraft()"/></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Client & session details</div>
-      <div class="field"><label>Client name</label><input type="text" id="clientName" placeholder="Full name" value="Bruce Ford Carter II" oninput="autoDraft()"/></div>
-      <div class="field-row">
-        <div><label>Service date</label><input type="date" id="serviceDate" onchange="autoDraft()"/></div>
-        <div><label>Total hours</label><input type="text" id="totalHrs" placeholder="e.g. 8" value="8" oninput="autoDraft()"/></div>
-      </div>
-      <div class="field-row">
-        <div><label>Start time</label><input type="time" id="startTime" onchange="autoDraft()"/></div>
-        <div><label>End time</label><input type="time" id="endTime" onchange="autoDraft()"/></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Persons present</div>
-      <div class="check-group">
-        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="persons" value="Parent"/>Parent</label>
-        <label class="check-pill checked" onclick="toggleCheck(this)"><input type="checkbox" name="persons" value="Teacher" checked/>Teacher</label>
-        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="persons" value="BC"/>BC</label>
-        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="persons" value="Other"/>Other</label>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Location</div>
-      <div class="check-group">
-        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="location" value="Home"/>Home</label>
-        <label class="check-pill checked" onclick="toggleCheck(this)"><input type="checkbox" name="location" value="School" checked/>School</label>
-        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="location" value="Community"/>Community</label>
-        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="location" value="Camp"/>Camp</label>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Goals worked on</div>
-      <div class="field"><label>Goal 1</label><input type="text" id="goal1" value="Decrease Non-compliant Behaviors" oninput="autoDraft()"/></div>
-      <div class="field"><label>Goal 2</label><input type="text" id="goal2" value="Increase Social Skills" oninput="autoDraft()"/></div>
-      <div class="field"><label>Goal 3</label><input type="text" id="goal3" value="Decrease Aggression" oninput="autoDraft()"/></div>
-    </div>
-    <button class="btn btn-primary" style="width:100%" onclick="switchTab('behaviors')">Next: Add Behaviors →</button>
-  </div>
-
-  <!-- BEHAVIORS -->
-  <div class="view" id="view-behaviors">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div class="section-label">Behavior entries</div>
-      <div class="entry-count" id="entry-count-label">0 entries</div>
-    </div>
-    <div id="entries-container"></div>
-    <button class="add-entry-btn" onclick="addEntry()"><span style="font-size:20px">＋</span> Add behavior entry</button>
-    <button class="btn btn-ghost" style="width:100%;margin-top:4px;" onclick="switchTab('summary')">Next: Summary & Save →</button>
-  </div>
-
-  <!-- SUMMARY -->
-  <div class="view" id="view-summary">
-    <div id="save-status"></div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>At-risk behavior</div>
-      <div class="check-group">
-        <label class="check-pill checked" id="risk-no" onclick="setRisk('No')"><input type="radio" name="risk" value="No" checked/>No</label>
-        <label class="check-pill" id="risk-yes" onclick="setRisk('Yes')"><input type="radio" name="risk" value="Yes"/>Yes</label>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Wrap-up details</div>
-      <div class="field"><label>How behavior was managed</label><textarea id="mgmt" rows="3" placeholder="e.g. Modeling using words, setting a timer, taking him for a walk and redirecting." oninput="autoDraft()"></textarea></div>
-      <div class="field"><label>Transfer of skills</label><textarea id="transfer" rows="2" placeholder="e.g. Taking sensory breaks to reduce anger, turn-taking." oninput="autoDraft()"></textarea></div>
-      <div class="field-row">
-        <div><label>Next service date</label><input type="date" id="nextDate" onchange="autoDraft()"/></div>
-        <div><label>Plan for next session</label><input type="text" id="nextPlan" placeholder="Brief plan..." oninput="autoDraft()"/></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Staff</div>
-      <div class="field"><label>Staff name</label><input type="text" id="staffName" placeholder="Full name" oninput="autoDraft()"/></div>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="dot"></span>Session overview</div>
-      <div class="summary-row"><span class="summary-label">Client</span><span class="summary-value" id="ov-client">—</span></div>
-      <div class="summary-row"><span class="summary-label">Date</span><span class="summary-value" id="ov-date">—</span></div>
-      <div class="summary-row"><span class="summary-label">Time</span><span class="summary-value" id="ov-time">—</span></div>
-      <div class="summary-row"><span class="summary-label">Behavior entries</span><span class="summary-value" id="ov-entries">—</span></div>
-      <div class="summary-row"><span class="summary-label">At-risk</span><span class="summary-value" id="ov-risk">—</span></div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn btn-success" id="save-btn" style="flex:1;justify-content:center;" onclick="saveToSharePoint()">💾 Save to SharePoint</button>
-      <button class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="openPrint()">🖨 Print / PDF</button>
-    </div>
-    <p class="hint" style="text-align:center;margin-top:8px;">Saves permanently to BHT_Reports list on SharePoint</p>
-    <div style="margin-top:10px;">
-      <button class="btn btn-ghost btn-sm" onclick="clearForm()" style="width:100%;justify-content:center;">🔄 Start new report</button>
-    </div>
-  </div>
-
-  <!-- PAST REPORTS -->
-  <div class="view" id="view-records">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div class="section-label">Saved reports</div>
-      <button class="btn btn-ghost btn-sm" onclick="loadRecords()">↻ Refresh</button>
-    </div>
-    <div id="records-container"><div class="empty-state"><div class="empty-icon">📂</div>Loading...</div></div>
-  </div>
-
-  <!-- PRINT -->
-  <div class="view" id="view-print">
-    <div class="no-print" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
-      <button class="btn btn-ghost" onclick="switchTab('summary')">← Back</button>
-    </div>
-    <div class="print-container" id="print-area"></div>
+<!-- FEATURES -->
+<div class="section" id="features">
+  <div class="section-eyebrow">Overview</div>
+  <div class="section-title">Feature Summary</div>
+  <div class="section-desc">Everything built into a single HTML file — no server, no installation, no login required.</div>
+  <div class="features-grid">
+    <div class="feat-card"><div class="feat-icon">📅</div><div class="feat-title">Date-Based Records</div><div class="feat-desc">Each report is tied to a service date. Load any past date or start fresh for a new day.</div></div>
+    <div class="feat-card"><div class="feat-icon">📝</div><div class="feat-title">ABC Behavior Entries</div><div class="feat-desc">Log Antecedent, Behavior, Caregiver & BHT Interventions, and Client Response for each incident.</div></div>
+    <div class="feat-card"><div class="feat-icon">📋</div><div class="feat-title">Copy Past Behaviors</div><div class="feat-desc">Search and copy behavior entries from any previous session into today's report.</div></div>
+    <div class="feat-card"><div class="feat-icon">🖨</div><div class="feat-title">Landscape A4 Print</div><div class="feat-desc">Professional print layout matching the original ABC Health Services form, max 4 incidents per page.</div></div>
+    <div class="feat-card"><div class="feat-icon">📤</div><div class="feat-title">Export to Excel</div><div class="feat-desc">Export all records to BHT_Reports.xlsx with smart merge — never overwrites existing data.</div></div>
+    <div class="feat-card"><div class="feat-icon">📥</div><div class="feat-title">Import from Excel</div><div class="feat-desc">Restore all browser data from a previously exported Excel file after cache is cleared.</div></div>
+    <div class="feat-card"><div class="feat-icon">⚙️</div><div class="feat-title">Settings Page</div><div class="feat-desc">Configure client name, staff name, signature, session defaults, and dynamic goals for any staff member.</div></div>
+    <div class="feat-card"><div class="feat-icon">💾</div><div class="feat-title">Auto-Save</div><div class="feat-desc">Saves automatically as you type. Status shown live in the header pill.</div></div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="divider"></div>
+
+<!-- GETTING STARTED -->
+<div class="section" id="getting-started">
+  <div class="section-eyebrow">Setup</div>
+  <div class="section-title">Getting Started</div>
+  <div class="section-desc">The app is a single HTML file. Open it in Chrome or Edge and it's ready to use.</div>
+  <div class="steps">
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Download the HTML file</div><div class="step-desc">Save <code>BHT_Daily_Report_App.html</code> to a folder you'll always keep it in (e.g. <code>C:\BHTWork\</code>). The file location matters because browser data is tied to it.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Open in Chrome or Edge</div><div class="step-desc">Double-click the file to open it in your browser. No internet connection required after the first load.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Configure Settings (first time)</div><div class="step-desc">Go to the <strong>⚙ Settings</strong> tab and set your client name, staff name, upload your signature, and configure default session times and goals. Click <strong>Save Settings</strong>.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Select a date and start</div><div class="step-desc">Pick today's date from the date bar at the top and click <strong>Load / New</strong> to begin a new report.</div></div></div>
+  </div>
+  <div class="info-box warn"><div class="info-icon">⚠️</div><div class="info-text"><strong>Important:</strong> Data is stored in the browser's localStorage tied to the exact file path. If you move or rename the file, previous data won't be visible. Always use the same file in the same location. Use <strong>Export to Local</strong> regularly to keep a backup Excel file.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SESSION INFO -->
+<div class="section" id="session-info">
+  <div class="section-eyebrow">Tab 1</div>
+  <div class="section-title">Session Info</div>
+  <div class="section-desc">The first tab captures all profile information for the session — client details, timing, who was present, location, and treatment goals.</div>
+
+  <div class="screen-wrap">
+    <div class="screen-bar">
+      <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+      <div class="screen-url">BHT_Daily_Report_App.html</div>
+    </div>
+    <div class="screen-body">
+      <div class="app-header">
+        <div class="app-header-left"><div class="org">ABC Health Services</div><div class="title">BHT Daily Report</div></div>
+        <div class="app-pill pill-saved">● Saved 9:15 AM</div>
+      </div>
+      <div class="app-datebar">
+        <label>📅 Date:</label>
+        <div class="app-dateinput">05/09/2026</div>
+        <button class="app-btn-load">Load / New</button>
+      </div>
+      <div style="background:#F0FDF4;padding:8px 16px;font-size:12px;font-weight:500;color:#16A34A;border-bottom:1px solid #BBF7D0;">✅ Record found for May 9, 2026 — loaded</div>
+      <div class="app-save-bar"><div class="app-save-btn">💾 Save</div><div style="font-size:11px;color:#16A34A;font-weight:500;">Last saved 9:15 AM</div></div>
+      <div class="app-tabs">
+        <div class="app-tab active">Session Info</div>
+        <div class="app-tab">Behaviors <span style="background:#2563EB;color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;margin-left:3px;">5</span></div>
+        <div class="app-tab">Summary</div>
+        <div class="app-tab">All Reports</div>
+        <div class="app-tab">Print</div>
+        <div class="app-tab">⚙ Settings</div>
+      </div>
+      <div class="app-body">
+        <div class="app-card">
+          <div class="app-card-title"><span class="app-dot"></span>Session Type</div>
+          <div class="app-pills">
+            <div class="app-chip on">✓ In person</div>
+            <div class="app-chip">Telehealth</div>
+            <div class="app-chip">Audio Only</div>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card-title"><span class="app-dot"></span>Client & Session Details</div>
+          <div class="app-field"><label>Client name</label><div class="app-input">Jim Gary</div></div>
+          <div class="field-row">
+            <div class="app-field"><label>Total hours (auto-calculated)</label><div class="app-input">8</div></div>
+            <div class="app-field"><label>Start time</label><div class="app-input">08:15 AM</div></div>
+          </div>
+          <div class="app-field"><label>End time</label><div class="app-input">04:15 PM</div></div>
+        </div>
+        <div class="app-card">
+          <div class="app-card-title"><span class="app-dot"></span>Goals Worked On</div>
+          <div class="app-field"><label>Goal 1</label><div class="app-input">Decrease Non-compliant Behaviors</div></div>
+          <div class="app-field"><label>Goal 2</label><div class="app-input">Increase Social Skills</div></div>
+          <div class="app-field" style="margin-bottom:0;"><label>Goal 3</label><div class="app-input">Decrease Aggression</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <table class="doc-table">
+    <thead><tr><th>Field</th><th>Description</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Date picker</strong></td><td>Select the service date. Existing records load automatically; new dates start fresh.</td><td>Today's date</td></tr>
+      <tr><td><strong>Session Type</strong></td><td>In person / Telehealth / Audio Only. Audio Only reveals phone number and reason fields.</td><td>In person</td></tr>
+      <tr><td><strong>Client Name</strong></td><td>Name of the client being served.</td><td>From Settings</td></tr>
+      <tr><td><strong>Start / End Time</strong></td><td>Session start and end times. Total Hours auto-calculates when both are set.</td><td>08:15 / 16:15</td></tr>
+      <tr><td><strong>Total Hours</strong></td><td>Auto-calculated from start/end. Editable if needed. Shows "6 hours 30 minutes" format.</td><td>Auto</td></tr>
+      <tr><td><strong>Persons Present</strong></td><td>Checkboxes: Parent, Teacher, BC, Other.</td><td>Teacher</td></tr>
+      <tr><td><strong>Location</strong></td><td>Checkboxes: Home, School, Community, Camp.</td><td>School</td></tr>
+      <tr><td><strong>Goals</strong></td><td>Dynamic — number of goals set in Settings. Each goal prints on the report.</td><td>3 goals</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text"><strong>Auto-Calculate Hours:</strong> When you set both Start and End time, Total Hours fills in automatically. For example, 8:15 AM to 4:15 PM = 8 hours. You can still edit manually.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- BEHAVIORS -->
+<div class="section" id="behaviors">
+  <div class="section-eyebrow">Tab 2</div>
+  <div class="section-title">Behaviors</div>
+  <div class="section-desc">Log each behavioral incident using the ABC format — Antecedent, Behavior, Interventions (Caregiver & BHT), and Client Response.</div>
+
+  <div class="screen-wrap">
+    <div class="screen-bar">
+      <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+      <div class="screen-url">BHT_Daily_Report_App.html — Behaviors Tab</div>
+    </div>
+    <div class="screen-body">
+      <div class="app-header">
+        <div class="app-header-left"><div class="org">ABC Health Services</div><div class="title">BHT Daily Report</div></div>
+        <div class="app-pill pill-saved">● Saved 9:15 AM</div>
+      </div>
+      <div class="app-tabs" style="border-top:1px solid #E4E2DC;">
+        <div class="app-tab">Session Info</div>
+        <div class="app-tab active">Behaviors <span style="background:#2563EB;color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;margin-left:3px;">2</span></div>
+        <div class="app-tab">Summary</div><div class="app-tab">All Reports</div><div class="app-tab">Print</div><div class="app-tab">⚙ Settings</div>
+      </div>
+      <div class="app-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:600;color:#9A9690;text-transform:uppercase;letter-spacing:.06em;">Behavior Entries</div>
+          <div style="font-size:11px;color:#9A9690;font-family:'DM Mono',monospace;">2 entries</div>
+        </div>
+        <div class="entry-card">
+          <div class="entry-header">
+            <div class="entry-num">ENTRY 1 <span class="entry-time-badge">9:00 AM</span></div>
+            <div style="display:flex;align-items:center;gap:6px;"><button style="color:#DC2626;background:none;border:none;font-size:18px;cursor:pointer;">×</button><span style="font-size:11px;color:#9A9690;">▲</span></div>
+          </div>
+          <div class="entry-body">
+            <div class="app-field"><label>Antecedent (what happened before)</label><div class="app-input" style="min-height:48px;font-size:12px;">While playing with soft bricks, Jim wanted a brick to play. Although Jim used his words to ask, the peer still declined.</div></div>
+            <div class="app-field"><label>Behavior (child's response)</label><div class="app-input" style="min-height:48px;font-size:12px;">Jim attempted to hit a peer who refused to share.</div></div>
+            <div class="app-field"><label>Caregiver / educator intervention</label><div class="app-input" style="font-size:12px;">Teacher did not observe.</div></div>
+            <div class="app-field"><label>BHT / TSS intervention</label><div class="app-input" style="font-size:12px;">BHT modelled how to respond when a peer says no.</div></div>
+            <div class="app-field" style="margin-bottom:0;"><label>Client's response</label><div class="app-input" style="font-size:12px;">Jim asked politely "Can I have it when you're done?"</div></div>
+          </div>
+        </div>
+        <div class="add-btns">
+          <div class="btn-new">＋ New entry</div>
+          <div class="btn-copy">📋 Copy from past</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <table class="doc-table">
+    <thead><tr><th>Field</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Time</strong></td><td>Time the incident occurred. Auto-fills with current time when entry is created. Shown in 12-hour format.</td></tr>
+      <tr><td><strong>Antecedent</strong></td><td>What happened immediately before the behavior — the trigger or situation.</td></tr>
+      <tr><td><strong>Behavior</strong></td><td>What the child did in response to the antecedent.</td></tr>
+      <tr><td><strong>Caregiver/Educator Intervention</strong></td><td>What the teacher or caregiver did to address the behavior.</td></tr>
+      <tr><td><strong>BHT/TSS Intervention</strong></td><td>What you (the BHT) did to support the child.</td></tr>
+      <tr><td><strong>Client's Response</strong></td><td>How the client responded to the interventions.</td></tr>
+      <tr><td><strong>× Delete button</strong></td><td>Removes that entry from the session. Shows a toast confirmation.</td></tr>
+      <tr><td><strong>▲/▼ Collapse</strong></td><td>Collapse an entry to show just the behavior preview, saving scroll space.</td></tr>
+    </tbody>
+  </table>
+  <div class="info-box note"><div class="info-icon">✅</div><div class="info-text"><strong>Max 8 incidents per day.</strong> When printing, entries are split across pages with a maximum of 4 per page. No blank rows are printed — only filled rows appear.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- COPY PAST BEHAVIORS -->
+<div class="section" id="copy-past">
+  <div class="section-eyebrow">Feature</div>
+  <div class="section-title">Copy Past Behaviors</div>
+  <div class="section-desc">Quickly copy behavior entries from any previous session date into today's report. Useful for recurring behaviors that appear across multiple days.</div>
+
+  <div class="screen-wrap">
+    <div class="screen-bar">
+      <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+      <div class="screen-url">Copy Past Behaviors — Modal</div>
+    </div>
+    <div class="screen-body">
+      <div style="background:#F8F6F1;padding:12px;">
+        <div class="modal-mock">
+          <div class="modal-mock-header">
+            <div><div class="modal-mock-title">📋 Copy Past Behaviors</div><div class="modal-mock-sub">Select behaviors from any previous session to copy into today</div></div>
+            <div style="color:#9A9690;cursor:pointer;font-size:18px;">×</div>
+          </div>
+          <div class="modal-toolbar">
+            <div class="modal-search">🔍 Search behaviors...</div>
+            <div class="modal-filter">All dates ▾</div>
+            <span style="font-size:11px;color:#2563EB;font-weight:600;">1 selected</span>
+          </div>
+          <div class="modal-body-inner">
+            <div class="pbh-date-label">📅 March 24, 2025</div>
+            <div class="pbh-grid">
+              <div class="pbh-card sel">
+                <span class="pbh-check on">✓</span>
+                <div class="pbh-beh">Jim attempted to hit a peer who refused to share.</div>
+                <div class="pbh-meta"><span class="pbh-tag">⏰ 9:00 AM</span><span class="pbh-tag" style="background:#EFF4FF;color:#2563EB;">A: While playing...</span></div>
+              </div>
+              <div class="pbh-card">
+                <span class="pbh-check"></span>
+                <div class="pbh-beh">Jim refused to cleanup and ran around the classroom.</div>
+                <div class="pbh-meta"><span class="pbh-tag">⏰ 10:30 AM</span><span class="pbh-tag" style="background:#F0FDF4;color:#16A34A;">R: Jim cleaned up</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="btn-cancel">Cancel</div>
+            <div class="btn-import-modal">Copy 1 Behavior</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Click "📋 Copy from past"</div><div class="step-desc">In the Behaviors tab, tap the blue "Copy from past" button next to "New entry".</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Search or filter by date</div><div class="step-desc">Use the search bar to find specific behaviors by keyword, or use the date dropdown to narrow to a specific past session.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Select behaviors</div><div class="step-desc">Tap any behavior card to select it (turns blue with checkmark). Select as many as you need.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Click "Copy X Behaviors"</div><div class="step-desc">The selected entries are copied into today's session with the current time. Edit them freely — the originals are unchanged.</div></div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SUMMARY -->
+<div class="section" id="summary">
+  <div class="section-eyebrow">Tab 3</div>
+  <div class="section-title">Summary</div>
+  <div class="section-desc">The Summary tab captures the wrap-up information for the session — at-risk status, how behavior was managed, skill transfer, next service date, and staff details.</div>
+
+  <div class="screen-wrap">
+    <div class="screen-bar">
+      <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+      <div class="screen-url">BHT_Daily_Report_App.html — Summary Tab</div>
+    </div>
+    <div class="screen-body">
+      <div class="app-tabs" style="border-top:1px solid #E4E2DC;">
+        <div class="app-tab">Session Info</div><div class="app-tab">Behaviors <span style="background:#2563EB;color:#fff;border-radius:99px;padding:1px 6px;font-size:10px;">5</span></div>
+        <div class="app-tab active">Summary</div><div class="app-tab">All Reports</div><div class="app-tab">Print</div><div class="app-tab">⚙ Settings</div>
+      </div>
+      <div class="app-body">
+        <div class="app-card">
+          <div class="app-card-title"><span class="app-dot"></span>At-Risk Behavior</div>
+          <div class="app-pills"><div class="app-chip on">✓ No</div><div class="app-chip">Yes</div></div>
+        </div>
+        <div class="app-card">
+          <div class="app-card-title"><span class="app-dot"></span>Wrap-Up Details</div>
+          <div class="app-field"><label>How behavior was managed</label><div class="app-input" style="min-height:56px;font-size:12px;">Taking him for a walk, giving him sensory breaks, talking about turn-taking and sharing.</div></div>
+          <div class="app-field"><label>Transfer of skills</label><div class="app-input" style="font-size:12px;">Taking sensory breaks to reduce anger, turn-taking.</div></div>
+          <div class="field-row">
+            <div class="app-field" style="margin-bottom:0;"><label>Next service date</label><div class="app-input" style="font-size:12px;">05/12/2026</div></div>
+            <div class="app-field" style="margin-bottom:0;"><label>Plan for next session</label><div class="app-input" style="font-size:12px;">Role playing social scenarios...</div></div>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card-title"><span class="app-dot"></span>Session Overview</div>
+          <div class="summary-row"><span style="color:#6B6860;font-size:13px;">Service date</span><span style="font-weight:500;font-size:13px;">May 9, 2026</span></div>
+          <div class="summary-row"><span style="color:#6B6860;font-size:13px;">Client</span><span style="font-weight:500;font-size:13px;">Jim Gary</span></div>
+          <div class="summary-row"><span style="color:#6B6860;font-size:13px;">Time</span><span style="font-weight:500;font-size:13px;">8:15 AM – 4:15 PM</span></div>
+          <div class="summary-row"><span style="color:#6B6860;font-size:13px;">Behavior entries</span><span style="font-weight:500;font-size:13px;">5</span></div>
+          <div class="summary-row"><span style="color:#6B6860;font-size:13px;">At-risk</span><span><span class="badge-ok">No</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text"><strong>Auto-filled defaults:</strong> How Behavior Was Managed, Transfer of Skills, Next Service Date (auto next working day Mon–Fri), and Plan for Next Session all pre-fill with default values configurable in Settings.</div></div>
+  <div class="info-box note"><div class="info-icon">📅</div><div class="info-text"><strong>Next Service Date</strong> automatically jumps to the next working day. If today is Friday, it sets Monday. Weekends are skipped automatically.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ALL REPORTS -->
+<div class="section" id="all-reports">
+  <div class="section-eyebrow">Tab 4</div>
+  <div class="section-title">All Reports</div>
+  <div class="section-desc">View, load, delete, and export all saved reports. This is also where the Export to Local and Import from Local buttons live.</div>
+
+  <div class="screen-wrap">
+    <div class="screen-bar">
+      <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+      <div class="screen-url">BHT_Daily_Report_App.html — All Reports Tab</div>
+    </div>
+    <div class="screen-body">
+      <div class="app-tabs" style="border-top:1px solid #E4E2DC;">
+        <div class="app-tab">Session Info</div><div class="app-tab">Behaviors</div><div class="app-tab">Summary</div>
+        <div class="app-tab active">All Reports</div><div class="app-tab">Print</div><div class="app-tab">⚙ Settings</div>
+      </div>
+      <div class="app-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:600;color:#9A9690;text-transform:uppercase;letter-spacing:.06em;">All Saved Reports</div>
+          <div style="display:flex;gap:8px;">
+            <div class="btn-sm-doc suc" style="display:flex;align-items:center;gap:4px;">📤 Export to Local</div>
+            <div class="btn-sm-doc acc" style="display:flex;align-items:center;gap:4px;">📥 Import from Local</div>
+            <div class="btn-sm-doc" style="display:flex;align-items:center;gap:4px;">📅 Export CSV</div>
+          </div>
+        </div>
+        <div class="report-row">
+          <div><div class="report-client">Jim Gary</div><div class="report-meta">May 9, 2026 · 8:15 AM – 4:15 PM · 5 entries · Saved 9:15 AM</div></div>
+          <div class="report-btns"><div class="btn-sm-doc acc">Load</div><div class="btn-sm-doc dan">Delete</div></div>
+        </div>
+        <div class="report-row">
+          <div><div class="report-client">Jim Gary</div><div class="report-meta">May 8, 2026 · 8:15 AM – 4:15 PM · 7 entries · Saved 4:22 PM</div></div>
+          <div class="report-btns"><div class="btn-sm-doc acc">Load</div><div class="btn-sm-doc dan">Delete</div></div>
+        </div>
+        <div class="report-row">
+          <div><div class="report-client">Jim Gary</div><div class="report-meta">May 7, 2026 · 8:15 AM – 4:15 PM · 3 entries · Saved 3:50 PM</div></div>
+          <div class="report-btns"><div class="btn-sm-doc acc">Load</div><div class="btn-sm-doc dan">Delete</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PRINT -->
+<div class="section" id="print">
+  <div class="section-eyebrow">Tab 5</div>
+  <div class="section-title">Print / Save PDF</div>
+  <div class="section-desc">Generate a professional A4 landscape print of the session report matching the official ABC Health Services BHT Daily Report form.</div>
+
+  <div class="screen-wrap">
+    <div class="screen-bar">
+      <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+      <div class="screen-url">BHT_Daily_Report_App.html — Print Preview</div>
+    </div>
+    <div class="screen-body">
+      <div class="app-body" style="padding:12px;">
+        <div style="background:#2563EB;color:#fff;padding:12px;border-radius:8px;text-align:center;font-size:14px;font-weight:600;margin-bottom:12px;">🖨 Print / Save PDF</div>
+        <div style="background:#fff;border:1px solid #E4E2DC;border-radius:10px;padding:14px;">
+          <div class="print-preview">
+            <div class="pv-org">OMNI HEALTH SERVICES</div>
+            <div class="pv-sub">BHT Daily Report</div>
+            <div class="pv-meta">
+              <div>☑ In person session &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ☐ Audio / Video</div>
+              <div>☐ Telehealth only – Verbal Consent obtained &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ☐ Audio Only – Ph number:</div>
+              <div style="text-align:right;font-weight:600;">Reason for Audio Only:</div>
+              <div style="margin-top:4px;"><strong>Client Name:</strong> <u>Jim Gary</u> &nbsp; <strong>Service Date:</strong> 5/09/2026 &nbsp; <strong>Start:</strong> 8:15 am &nbsp; <strong>End:</strong> 4:15 pm &nbsp; <strong>Total Hrs:</strong> 8</div>
+              <div><strong>Persons Present:</strong> ☐ Parent ☑ Teacher ☐ BC ☐ Other &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Location:</strong> ☐ Home ☑ School ☐ Community ☐ Camp</div>
+              <div><strong>Goals worked on:</strong> 1. Decrease Non-compliant Behaviors &nbsp; 2. Increase Social Skills &nbsp; 3. Decrease Aggression</div>
+            </div>
+            <table class="pv-table">
+              <thead><tr>
+                <th style="width:23%">Antecedent<br/><span style="font-weight:400;">(What occurred before the behavior)</span></th>
+                <th style="width:23%">Describe Behavior<br/><span style="font-weight:400;">(Child's response to antecedent)</span></th>
+                <th style="width:30%">Interventions Used by<br/><span style="font-weight:400;">1 Caregiver/Educator &nbsp; 2. TSS</span></th>
+                <th style="width:24%">Client's Response<br/><span style="font-weight:400;">to the intervention(s)</span></th>
+              </tr></thead>
+              <tbody>
+                <tr><td style="height:40px;">While playing with blocks...</td><td>Jim attempted to hit a peer...</td><td>1. Teacher did not observe.<br/><br/>2. BHT modelled how to respond...</td><td>Jim asked politely "Can I have it..."</td></tr>
+                <tr><td style="height:40px;">While transitioning to circle time...</td><td>Jim hit that peer...</td><td>1. Teacher did not observe.<br/><br/>2. BHT modelled appropriate responses...</td><td>Jim repeated the words...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout-diagram">
+    <div class="layout-page">
+      <div class="layout-page-label">Page 1 — Full Header + Up to 4 Incidents</div>
+      <div class="layout-row header">OMNI HEALTH SERVICES · BHT Daily Report</div>
+      <div class="layout-row meta">Session Type checkboxes · Reason for Audio Only</div>
+      <div class="layout-row meta">Client Name · Date · Start · End · Total Hrs</div>
+      <div class="layout-row meta">Persons Present · Location · Goals</div>
+      <div class="layout-row incident">Incident 1</div>
+      <div class="layout-row incident">Incident 2</div>
+      <div class="layout-row incident">Incident 3</div>
+      <div class="layout-row incident">Incident 4</div>
+      <div class="layout-row footer">At Risk · How Managed · Transfer · Next Date · Signature (last page only)</div>
+    </div>
+    <div class="layout-page">
+      <div class="layout-page-label">Page 2 — Short Header + Remaining Incidents + Footer</div>
+      <div class="layout-row meta">Client Name · Date · Start · End · Total Hrs</div>
+      <div class="layout-row meta">Persons Present · Location · Goals</div>
+      <div class="layout-row incident">Incident 5</div>
+      <div class="layout-row incident">Incident 6</div>
+      <div class="layout-row incident">Incident 7</div>
+      <div class="layout-row incident">Incident 8</div>
+      <div class="layout-row footer">At Risk · How Managed · Transfer · Next Date · Signature</div>
+    </div>
+  </div>
+
+  <div class="info-box warn"><div class="info-icon">⚠️</div><div class="info-text"><strong>Remove browser headers/footers:</strong> In the print dialog, click <strong>More settings</strong> → uncheck <strong>Headers and footers</strong> to remove the date/time and file path that Chrome adds automatically.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SETTINGS -->
+<div class="section" id="settings">
+  <div class="section-eyebrow">Tab 6</div>
+  <div class="section-title">⚙ Settings</div>
+  <div class="section-desc">Configure all default values for a new staff member or client. Settings apply to every new session automatically.</div>
+
+  <div class="screen-wrap">
+    <div class="screen-bar">
+      <div class="screen-dot r"></div><div class="screen-dot y"></div><div class="screen-dot g"></div>
+      <div class="screen-url">BHT_Daily_Report_App.html — Settings Tab</div>
+    </div>
+    <div class="screen-body">
+      <div class="app-tabs" style="border-top:1px solid #E4E2DC;">
+        <div class="app-tab">Session Info</div><div class="app-tab">Behaviors</div><div class="app-tab">Summary</div><div class="app-tab">All Reports</div><div class="app-tab">Print</div>
+        <div class="app-tab active">⚙ Settings</div>
+      </div>
+      <div class="app-body">
+        <div class="cfg-section">
+          <div class="cfg-title"><span class="app-dot"></span>Client Details</div>
+          <div class="app-field"><label>Default Client Name</label><div class="app-input">Jim Gary</div></div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-title"><span class="app-dot"></span>Staff Details</div>
+          <div class="app-field"><label>Staff Name</label><div class="app-input">J. Smith</div></div>
+          <div class="sig-zone">✍ Click to upload signature image (PNG/JPG)<br/><span style="font-size:10px;color:#BBB;">Embedded in print — works offline</span></div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-title"><span class="app-dot"></span>Session Defaults</div>
+          <div class="app-field"><label>Default Session Type</label>
+            <div class="app-pills"><div class="app-chip on">✓ In person</div><div class="app-chip">Telehealth</div><div class="app-chip">Audio Only</div></div>
+          </div>
+          <div class="field-row">
+            <div class="app-field"><label>Default Start Time</label><div class="app-input">08:15</div></div>
+            <div class="app-field"><label>Default End Time</label><div class="app-input">16:15</div></div>
+          </div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-title"><span class="app-dot"></span>Summary Defaults</div>
+          <div class="app-field"><label>How Behavior Was Managed</label><div class="app-input" style="font-size:12px;min-height:48px;">Taking him for a walk, giving him sensory breaks, talking about turn-taking and sharing.</div></div>
+          <div class="app-field"><label>Transfer of Skills</label><div class="app-input" style="font-size:12px;">Taking sensory breaks to reduce anger, turn-taking.</div></div>
+          <div class="app-field"><label>Plan for Next Session</label><div class="app-input" style="font-size:12px;">Role playing social scenarios to practise appropriate respond to adult</div></div>
+        </div>
+        <div class="cfg-section">
+          <div class="cfg-title"><span class="app-dot"></span>Goals</div>
+          <div class="goal-row"><span class="goal-num">G1</span><div class="goal-input">Decrease Non-compliant Behaviors</div><div class="btn-del">×</div></div>
+          <div class="goal-row"><span class="goal-num">G2</span><div class="goal-input">Increase Social Skills</div><div class="btn-del">×</div></div>
+          <div class="goal-row"><span class="goal-num">G3</span><div class="goal-input">Decrease Aggression</div><div class="btn-del">×</div></div>
+          <div class="btn-add-goal-doc">+ Add Goal</div>
+        </div>
+        <div class="btn-save-cfg">✓ Save Settings &amp; Apply</div>
+      </div>
+    </div>
+  </div>
+
+  <table class="doc-table">
+    <thead><tr><th>Setting</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Client Name</strong></td><td>Pre-fills the client name field on every new session.</td></tr>
+      <tr><td><strong>Staff Name</strong></td><td>Pre-fills the staff name field and appears on the printed form.</td></tr>
+      <tr><td><strong>Signature Image</strong></td><td>Upload a PNG/JPG of your signature. It gets embedded in the HTML and appears on every printed report. Works offline.</td></tr>
+      <tr><td><strong>Session Type</strong></td><td>Which session type radio button is pre-selected for new sessions.</td></tr>
+      <tr><td><strong>Start / End Time</strong></td><td>Default times pre-filled when starting a new session. Total hours auto-calculates.</td></tr>
+      <tr><td><strong>How Managed / Transfer / Next Plan</strong></td><td>Default text pre-filled in the Summary tab for every new session.</td></tr>
+      <tr><td><strong>Goals</strong></td><td>Add, delete, or rename goals. Any number supported. Goals appear on Session Info and print on every page of the report.</td></tr>
+      <tr><td><strong>Persons Present / Location</strong></td><td>Which checkboxes are pre-checked for new sessions.</td></tr>
+    </tbody>
+  </table>
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text"><strong>For a new staff member or client:</strong> Go to Settings, update all fields, upload the new signature, and click Save. The entire app now operates for that staff/client combination.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- EXPORT -->
+<div class="section" id="export-local">
+  <div class="section-eyebrow">Data</div>
+  <div class="section-title">Export to Local Excel</div>
+  <div class="section-desc">Export all browser records to a <code>BHT_Reports.xlsx</code> file. Supports smart merging — upload an existing file and only new records are added.</div>
+  <div class="steps">
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Go to All Reports tab</div><div class="step-desc">Click the "📤 Export to Local" button in the top right.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Choose merge or fresh export</div><div class="step-desc"><strong>Upload existing BHT_Reports.xlsx</strong> → merges new records without overwriting old ones.<br/><strong>Ignore & Export Fresh</strong> → exports all current browser data as a new file.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">File downloads automatically</div><div class="step-desc">BHT_Reports.xlsx downloads to your Downloads folder. Move it to your preferred location (e.g. C:\BHTWork\).</div></div></div>
+  </div>
+  <div class="info-box note"><div class="info-icon">✅</div><div class="info-text">The Excel file contains one row per incident with all profile fields (Client Name, Date, Goals, Staff, etc.) repeated on every row for easy filtering and searching in Excel.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- IMPORT -->
+<div class="section" id="import-local">
+  <div class="section-eyebrow">Data</div>
+  <div class="section-title">Import from Local Excel</div>
+  <div class="section-desc">Restore all your data back into the browser from a previously exported Excel file. Use this if you accidentally cleared browser cache or switched to a new computer.</div>
+  <div class="steps">
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Click "📥 Import from Local"</div><div class="step-desc">In the All Reports tab, click the blue Import button.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Upload your BHT_Reports.xlsx</div><div class="step-desc">A preview appears showing how many dates and incidents were found in the file.</div></div></div>
+    <div class="step"><div class="step-num"></div><div class="step-body"><div class="step-title">Click "Restore to Browser"</div><div class="step-desc">All dates are restored to localStorage. You can then select any date from the date picker and see the full report.</div></div></div>
+  </div>
+  <div class="info-box warn"><div class="info-icon">⚠️</div><div class="info-text">Importing will <strong>update</strong> any matching dates already in the browser with data from the Excel file. Dates not in the Excel file are left untouched.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- AUTO-SAVE -->
+<div class="section" id="autosave">
+  <div class="section-eyebrow">Feature</div>
+  <div class="section-title">Auto-Save</div>
+  <div class="section-desc">The app saves automatically as you type. No need to manually click Save for every change.</div>
+  <table class="doc-table">
+    <thead><tr><th>Pill Status</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span style="background:rgba(217,119,6,.2);border:1px solid rgba(217,119,6,.4);color:#FCD34D;padding:3px 10px;border-radius:99px;font-size:12px;">● Saving...</span></td><td>You just typed something. The app will save in 1.5 seconds.</td></tr>
+      <tr><td><span style="background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.4);color:#4ADE80;padding:3px 10px;border-radius:99px;font-size:12px;">● Saved 9:15 AM</span></td><td>All changes are saved to browser storage.</td></tr>
+      <tr><td><span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.55);padding:3px 10px;border-radius:99px;font-size:12px;">● Select a date</span></td><td>No date selected yet. Select a date to start.</td></tr>
+    </tbody>
+  </table>
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text">You can also click the green <strong>Save</strong> button manually at any time to force an immediate save and see confirmation.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PAGINATION -->
+<div class="section" id="pagination">
+  <div class="section-eyebrow">Reference</div>
+  <div class="section-title">Print Pagination Rules</div>
+  <div class="section-desc">Max 4 incidents per page. No blank rows are ever printed. Footer (At Risk, Signature, etc.) appears only on the last page.</div>
+  <table class="doc-table">
+    <thead><tr><th>Incidents</th><th>Page 1</th><th>Page 2</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>1 row</td><td>—</td></tr>
+      <tr><td>2</td><td>2 rows</td><td>—</td></tr>
+      <tr><td>3</td><td>3 rows</td><td>—</td></tr>
+      <tr><td>4</td><td>4 rows</td><td>—</td></tr>
+      <tr><td>5</td><td>4 rows</td><td>1 row</td></tr>
+      <tr><td>6</td><td>4 rows</td><td>2 rows</td></tr>
+      <tr><td>7</td><td>4 rows</td><td>3 rows</td></tr>
+      <tr><td><strong>8 (max)</strong></td><td><strong>4 rows</strong></td><td><strong>4 rows</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- FIELD REFERENCE -->
+<div class="section" id="fields">
+  <div class="section-eyebrow">Reference</div>
+  <div class="section-title">Field Reference</div>
+  <div class="section-desc">Complete list of all fields stored per session date and exported to Excel.</div>
+  <table class="doc-table">
+    <thead><tr><th>Field</th><th>Where</th><th>Excel Column</th></tr></thead>
+    <tbody>
+      <tr><td>Service Date</td><td>Date bar</td><td>Service Date</td></tr>
+      <tr><td>Client Name</td><td>Session Info</td><td>Client Name</td></tr>
+      <tr><td>Start Time</td><td>Session Info</td><td>Start Time</td></tr>
+      <tr><td>End Time</td><td>Session Info</td><td>End Time</td></tr>
+      <tr><td>Total Hours</td><td>Session Info (auto)</td><td>Total Hours</td></tr>
+      <tr><td>Session Type</td><td>Session Info</td><td>Session Type</td></tr>
+      <tr><td>Persons Present</td><td>Session Info</td><td>Persons Present</td></tr>
+      <tr><td>Location</td><td>Session Info</td><td>Location</td></tr>
+      <tr><td>Goal 1 / 2 / 3</td><td>Session Info</td><td>Goal 1, Goal 2, Goal 3</td></tr>
+      <tr><td>Incident #</td><td>Behaviors (per entry)</td><td>Incident #</td></tr>
+      <tr><td>Incident Time</td><td>Behaviors (per entry)</td><td>Incident Time</td></tr>
+      <tr><td>Antecedent</td><td>Behaviors (per entry)</td><td>Antecedent</td></tr>
+      <tr><td>Behavior</td><td>Behaviors (per entry)</td><td>Behavior</td></tr>
+      <tr><td>Caregiver Intervention</td><td>Behaviors (per entry)</td><td>Caregiver Intervention</td></tr>
+      <tr><td>BHT Intervention</td><td>Behaviors (per entry)</td><td>BHT Intervention</td></tr>
+      <tr><td>Client Response</td><td>Behaviors (per entry)</td><td>Client Response</td></tr>
+      <tr><td>At Risk</td><td>Summary</td><td>At Risk</td></tr>
+      <tr><td>How Managed</td><td>Summary</td><td>How Managed</td></tr>
+      <tr><td>Transfer of Skills</td><td>Summary</td><td>Transfer of Skills</td></tr>
+      <tr><td>Next Service Date</td><td>Summary</td><td>Next Service Date</td></tr>
+      <tr><td>Next Plan</td><td>Summary</td><td>Next Plan</td></tr>
+      <tr><td>Staff Name</td><td>Summary / Settings</td><td>Staff Name</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<!-- TIPS -->
+<div class="section" id="tips">
+  <div class="section-eyebrow">Reference</div>
+  <div class="section-title">Tips & FAQ</div>
+  <div class="section-desc">Common questions and best practices.</div>
+
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text"><strong>Q: I cleared browser cache and lost my data. What do I do?</strong><br/>Open the Import from Local feature in All Reports tab and upload your BHT_Reports.xlsx backup to restore everything.</div></div>
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text"><strong>Q: I moved the HTML file to a new folder and now my data is gone.</strong><br/>Browser data is tied to the exact file path. Move the file back to its original location, or import data from your Excel backup.</div></div>
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text"><strong>Q: I want to use this for a different client or staff.</strong><br/>Go to Settings → update Client Name, Staff Name, upload new signature, adjust goals, click Save Settings. The app is now configured for the new staff/client.</div></div>
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text"><strong>Q: The date/time and file path still show on my printed PDF.</strong><br/>In Chrome print dialog → More settings → uncheck "Headers and footers". Chrome remembers this setting for future prints.</div></div>
+  <div class="info-box tip"><div class="info-icon">💡</div><div class="info-text"><strong>Q: Can I add more than 3 goals?</strong><br/>Yes! Go to Settings → Goals section → click "+ Add Goal" to add as many as needed. Delete any with the × button.</div></div>
+  <div class="info-box note"><div class="info-icon">✅</div><div class="info-text"><strong>Best Practice:</strong> Export to Local at the end of each week to keep a running Excel backup. Keep the HTML file and Excel file in the same folder (e.g. <code>C:\BHTWork\</code>) for easy access.</div></div>
+
+  <div style="margin-top:40px;padding:24px;background:var(--ink);border-radius:12px;color:#fff;text-align:center;">
+    <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:700;margin-bottom:8px;">BHT Daily Report App</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.5);">ABC Health Services · Default Staff · v2.0</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.3);margin-top:6px;">Built with care for daily behavioral health documentation</div>
+  </div>
+  <div style="height:40px;"></div>
+</div>
+
+</div><!-- /content -->
+</main>
+</div><!-- /wrapper -->
 
 <script>
-// ── CONFIG — IT will give you these two IDs ──────────────
-const CONFIG = {
-  clientId: 'YOUR_CLIENT_ID',   // ← paste Application (client) ID from IT
-  tenantId: 'YOUR_TENANT_ID',   // ← paste Directory (tenant) ID from IT
-  spSite:   'https://omhsi1.sharepoint.com/sites/vegiyasoda',
-  spList:   'BHT_Reports'
-};
-
-// ── STATE ────────────────────────────────────────────────
-let msalApp = null, currentAccount = null, accessToken = null;
-let entries = [], entryCounter = 0;
-let _digest = { v: null, exp: 0 };
-let draftTimer = null;
-const DRAFT_KEY = 'bht_draft_v2';
-
-// ── MSAL INIT ────────────────────────────────────────────
-async function initAuth() {
-  msalApp = new msal.PublicClientApplication({
-    auth: {
-      clientId: CONFIG.clientId,
-      authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
-      redirectUri: window.location.origin + window.location.pathname
-    },
-    cache: { cacheLocation: 'sessionStorage' }
+// Smooth scroll for sidebar links
+document.querySelectorAll('.nav-item').forEach(link => {
+  link.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      document.querySelector(href)?.scrollIntoView({behavior:'smooth'});
+      document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+    }
   });
-  await msalApp.initialize();
-
-  // Handle redirect after login
-  const result = await msalApp.handleRedirectPromise();
-  if (result) {
-    currentAccount = result.account;
-    accessToken = result.accessToken;
-    showApp();
-    return;
-  }
-
-  // Already logged in?
-  const accounts = msalApp.getAllAccounts();
-  if (accounts.length > 0) {
-    currentAccount = accounts[0];
-    await getToken();
-    showApp();
-  }
-}
-
-async function signIn() {
-  const btn = document.getElementById('login-btn');
-  btn.innerHTML = '<span style="width:16px;height:16px;border:2px solid #ccc;border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;"></span> Signing in...';
-  btn.disabled = true;
-  try {
-    await msalApp.loginRedirect({
-      scopes: [`${CONFIG.spSite}/.default`]
-    });
-  } catch(e) {
-    btn.innerHTML = '⚠ Sign in failed — try again';
-    btn.disabled = false;
-  }
-}
-
-async function getToken() {
-  try {
-    const r = await msalApp.acquireTokenSilent({
-      scopes: [`${CONFIG.spSite}/.default`],
-      account: currentAccount
-    });
-    accessToken = r.accessToken;
-  } catch(e) {
-    await msalApp.acquireTokenRedirect({ scopes: [`${CONFIG.spSite}/.default`] });
-  }
-}
-
-function showApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'block';
-  const name = currentAccount?.name || currentAccount?.username || 'Staff';
-  document.getElementById('user-name').textContent = name.split(' ')[0];
-  if (!document.getElementById('staffName').value) {
-    document.getElementById('staffName').value = name;
-  }
-  restoreDraft();
-  renderEntries();
-  updateEntryBadge();
-}
-
-// ── SHAREPOINT API ───────────────────────────────────────
-async function getDigest() {
-  if (_digest.v && Date.now() < _digest.exp) return _digest.v;
-  await getToken();
-  const r = await fetch(`${CONFIG.spSite}/_api/contextinfo`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json;odata=verbose' }
-  });
-  const d = await r.json();
-  _digest.v = d.d.GetContextWebInformation.FormDigestValue;
-  _digest.exp = Date.now() + 25 * 60 * 1000;
-  return _digest.v;
-}
-
-async function spGet(path) {
-  await getToken();
-  const r = await fetch(`${CONFIG.spSite}/_api${path}`, {
-    headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/json;odata=verbose' }
-  });
-  if (!r.ok) throw new Error(`SharePoint error ${r.status}`);
-  return r.json();
-}
-
-async function spPost(path, body) {
-  const digest = await getDigest();
-  const r = await fetch(`${CONFIG.spSite}/_api${path}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/json;odata=verbose',
-      'Content-Type': 'application/json;odata=verbose',
-      'X-RequestDigest': digest
-    },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) throw new Error(`SharePoint error ${r.status}: ${(await r.text()).substring(0,200)}`);
-  return r.json();
-}
-
-// ── SAVE ─────────────────────────────────────────────────
-async function saveToSharePoint() {
-  const btn = document.getElementById('save-btn');
-  const statusEl = document.getElementById('save-status');
-  if (!gv('clientName')) { showToast('⚠ Enter client name first'); switchTab('info'); return; }
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Saving...';
-  statusEl.innerHTML = '<div class="status-banner status-saving">⏳ Saving to SharePoint...</div>';
-  try {
-    const risk = document.querySelector('input[name="risk"]:checked');
-    const stEl = document.querySelector('input[name="sessionType"]:checked');
-    await spPost(`/lists/getbytitle('${CONFIG.spList}')/items`, {
-      '__metadata': { 'type': 'SP.Data.BHT_x005f_ReportsListItem' },
-      'Title': `${gv('clientName')} – ${gv('serviceDate')}`,
-      'ClientName': gv('clientName'),
-      'ServiceDate': gv('serviceDate') ? new Date(gv('serviceDate')+'T12:00').toISOString() : null,
-      'StartTime': gv('startTime'), 'EndTime': gv('endTime'), 'TotalHours': gv('totalHrs'),
-      'SessionType': stEl?.value || 'in-person',
-      'PersonsPresent': getChecked('persons').join(', '),
-      'Location': getChecked('location').join(', '),
-      'Goal1': gv('goal1'), 'Goal2': gv('goal2'), 'Goal3': gv('goal3'),
-      'BehaviorEntries': JSON.stringify(entries),
-      'AtRiskBehavior': risk?.value || 'No',
-      'HowManaged': gv('mgmt'), 'TransferOfSkills': gv('transfer'),
-      'NextServiceDate': gv('nextDate') ? new Date(gv('nextDate')+'T12:00').toISOString() : null,
-      'NextPlan': gv('nextPlan'), 'StaffName': gv('staffName')
-    });
-    clearDraft();
-    statusEl.innerHTML = '<div class="status-banner status-saved">✅ Saved to SharePoint!</div>';
-    btn.innerHTML = '✅ Saved!'; btn.style.background = 'var(--success)';
-    showToast('Report saved ✓');
-    setTimeout(() => { btn.disabled=false; btn.innerHTML='💾 Save to SharePoint'; btn.style.background=''; }, 3000);
-    loadRecords();
-  } catch(err) {
-    statusEl.innerHTML = `<div class="status-banner status-error">❌ ${err.message}</div>`;
-    btn.disabled = false; btn.innerHTML = '💾 Save to SharePoint';
-  }
-}
-
-// ── LOAD RECORDS ─────────────────────────────────────────
-async function loadRecords() {
-  const con = document.getElementById('records-container');
-  con.innerHTML = '<div class="empty-state">Loading...</div>';
-  try {
-    const data = await spGet(`/lists/getbytitle('${CONFIG.spList}')/items?$orderby=Created desc&$top=100&$select=Id,Title,ClientName,ServiceDate,StaffName`);
-    const items = data?.d?.results || [];
-    if (!items.length) { con.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No reports saved yet</div>'; return; }
-    con.innerHTML = items.map(item => {
-      const date = item.ServiceDate ? new Date(item.ServiceDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
-      return `<div class="record-row" onclick="loadRecord(${item.Id})">
-        <div><div class="record-client">${item.ClientName||item.Title}</div>
-        <div class="record-meta">${date} · ${item.StaffName||'Unknown'}</div></div>
-        <div style="color:var(--ink3);font-size:20px">›</div>
-      </div>`;
-    }).join('');
-  } catch(err) {
-    con.innerHTML = `<div class="empty-state" style="color:var(--danger)"><div class="empty-icon">⚠️</div>${err.message}</div>`;
-  }
-}
-
-async function loadRecord(id) {
-  showToast('Loading...');
-  try {
-    const data = await spGet(`/lists/getbytitle('${CONFIG.spList}')/items(${id})`);
-    const item = data?.d; if (!item) return;
-    ['clientName','startTime','endTime','totalHrs','goal1','goal2','goal3','mgmt','transfer','nextPlan','staffName'].forEach(f => {
-      const map = {clientName:'ClientName',startTime:'StartTime',endTime:'EndTime',totalHrs:'TotalHours',goal1:'Goal1',goal2:'Goal2',goal3:'Goal3',mgmt:'HowManaged',transfer:'TransferOfSkills',nextPlan:'NextPlan',staffName:'StaffName'};
-      const el = document.getElementById(f); if(el && item[map[f]]) el.value = item[map[f]];
-    });
-    if(item.ServiceDate) document.getElementById('serviceDate').value = item.ServiceDate.split('T')[0];
-    if(item.NextServiceDate) document.getElementById('nextDate').value = item.NextServiceDate.split('T')[0];
-    if(item.BehaviorEntries){try{entries=JSON.parse(item.BehaviorEntries);entryCounter=entries.reduce((m,e)=>Math.max(m,e.id),0);}catch(e){entries=[];}}
-    updateEntryBadge(); renderEntries(); switchTab('info'); showToast('Record loaded ✓');
-  } catch(err) { showToast('Could not load: '+err.message); }
-}
-
-// ── AUTO DRAFT ───────────────────────────────────────────
-function autoDraft() { clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 3000); }
-function saveDraft() {
-  try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({
-      clientName:gv('clientName'),serviceDate:gv('serviceDate'),startTime:gv('startTime'),
-      endTime:gv('endTime'),totalHrs:gv('totalHrs'),goal1:gv('goal1'),goal2:gv('goal2'),
-      goal3:gv('goal3'),mgmt:gv('mgmt'),transfer:gv('transfer'),nextDate:gv('nextDate'),
-      nextPlan:gv('nextPlan'),staffName:gv('staffName'),audioPh:gv('audioPh'),
-      audioReason:gv('audioReason'),entries,
-      sessionType:document.querySelector('input[name="sessionType"]:checked')?.value||'in-person',
-      persons:getChecked('persons'),location:getChecked('location'),
-      risk:document.querySelector('input[name="risk"]:checked')?.value||'No',
-      savedAt:new Date().toISOString()
-    }));
-    const t = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    const el = document.getElementById('draft-banner');
-    if(el) el.innerHTML = `<div class="draft-banner"><span>🟡 Draft auto-saved at ${t}</span><button onclick="clearDraft()" style="font-size:12px;color:var(--warn);font-weight:500;">Dismiss</button></div>`;
-  } catch(e){}
-}
-function restoreDraft() {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY); if(!raw) return;
-    const d = JSON.parse(raw);
-    if(new Date(d.savedAt).toDateString()!==new Date().toDateString()){localStorage.removeItem(DRAFT_KEY);return;}
-    if(d.clientName) document.getElementById('clientName').value=d.clientName;
-    if(d.serviceDate) document.getElementById('serviceDate').value=d.serviceDate;
-    if(d.startTime) document.getElementById('startTime').value=d.startTime;
-    if(d.endTime) document.getElementById('endTime').value=d.endTime;
-    if(d.totalHrs) document.getElementById('totalHrs').value=d.totalHrs;
-    if(d.goal1) document.getElementById('goal1').value=d.goal1;
-    if(d.goal2) document.getElementById('goal2').value=d.goal2;
-    if(d.goal3) document.getElementById('goal3').value=d.goal3;
-    if(d.mgmt) document.getElementById('mgmt').value=d.mgmt;
-    if(d.transfer) document.getElementById('transfer').value=d.transfer;
-    if(d.nextDate) document.getElementById('nextDate').value=d.nextDate;
-    if(d.nextPlan) document.getElementById('nextPlan').value=d.nextPlan;
-    if(d.staffName) document.getElementById('staffName').value=d.staffName;
-    if(d.entries){entries=d.entries;entryCounter=entries.reduce((m,e)=>Math.max(m,e.id),0);}
-    if(d.sessionType){document.querySelectorAll('input[name="sessionType"]').forEach(i=>{const p=i.closest('.check-pill');i.value===d.sessionType?(i.checked=true,p.classList.add('checked')):(i.checked=false,p.classList.remove('checked'));});document.getElementById('audio-ph').style.display=d.sessionType==='audio'?'block':'none';}
-    if(d.persons) restoreGroup('persons',d.persons);
-    if(d.location) restoreGroup('location',d.location);
-    if(d.risk) setRisk(d.risk);
-    const t=new Date(d.savedAt).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    const el=document.getElementById('draft-banner');
-    if(el) el.innerHTML=`<div class="draft-banner"><span>🟡 Draft restored from ${t} — not yet saved to SharePoint</span><button onclick="clearDraft()" style="font-size:12px;color:var(--warn);font-weight:500;">Dismiss</button></div>`;
-  } catch(e){localStorage.removeItem(DRAFT_KEY);}
-}
-function restoreGroup(name,values){document.querySelectorAll(`input[name="${name}"]`).forEach(i=>{const p=i.closest('.check-pill');values.includes(i.value)?(i.checked=true,p.classList.add('checked')):(i.checked=false,p.classList.remove('checked'));});}
-function clearDraft(){localStorage.removeItem(DRAFT_KEY);const el=document.getElementById('draft-banner');if(el)el.innerHTML='';}
-
-// ── CLEAR FORM ───────────────────────────────────────────
-function clearForm(){
-  if(!confirm('Start a new report? This clears all fields.')) return;
-  ['clientName','totalHrs','mgmt','transfer','nextPlan','staffName','audioPh','audioReason','nextDate'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('clientName').value='Bruce Ford Carter II';
-  document.getElementById('goal1').value='Decrease Non-compliant Behaviors';
-  document.getElementById('goal2').value='Increase Social Skills';
-  document.getElementById('goal3').value='Decrease Aggression';
-  document.getElementById('totalHrs').value='8';
-  document.getElementById('serviceDate').value=new Date().toISOString().split('T')[0];
-  document.getElementById('startTime').value='08:15';
-  document.getElementById('endTime').value='16:15';
-  if(currentAccount?.name) document.getElementById('staffName').value=currentAccount.name;
-  entries=[];entryCounter=0;renderEntries();updateEntryBadge();
-  document.getElementById('save-status').innerHTML='';
-  setRisk('No');clearDraft();switchTab('info');showToast('New report started ✓');
-}
-
-// ── UI HELPERS ───────────────────────────────────────────
-function switchTab(n){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('view-'+n).classList.add('active');document.getElementById('tab-'+n).classList.add('active');if(n==='summary')refreshSummary();if(n==='records')loadRecords();if(n==='print')buildPrint();window.scrollTo(0,0);}
-function toggleCheck(el){el.classList.toggle('checked');el.querySelector('input').checked=!el.querySelector('input').checked;autoDraft();}
-function togglePill(el,name,val){document.querySelectorAll(`input[name="${name}"]`).forEach(i=>i.closest('.check-pill').classList.remove('checked'));el.classList.add('checked');el.querySelector('input').checked=true;if(name==='sessionType')document.getElementById('audio-ph').style.display=val==='audio'?'block':'none';autoDraft();}
-function setRisk(val){['No','Yes'].forEach(v=>{const el=document.getElementById('risk-'+v.toLowerCase());el.classList.toggle('checked',v===val);el.querySelector('input').checked=v===val;});autoDraft();}
-function gv(id){return(document.getElementById(id)||{}).value||'';}
-function getChecked(name){return[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value);}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
-function updateEntryBadge(){const n=entries.length;document.getElementById('entry-badge').textContent=n?`(${n})`:'';const l=document.getElementById('entry-count-label');if(l)l.textContent=n+' entr'+(n===1?'y':'ies');}
-function addEntry(){entryCounter++;const id=entryCounter;entries.push({id,time:new Date().toTimeString().slice(0,5),antecedent:'',behavior:'',caregiverIntv:'',bhtIntv:'',response:'',goals:[],collapsed:false});renderEntries();updateEntryBadge();autoDraft();setTimeout(()=>document.getElementById('entry-'+id)?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);}
-function deleteEntry(id){entries=entries.filter(e=>e.id!==id);renderEntries();updateEntryBadge();autoDraft();showToast('Entry removed');}
-function toggleCollapse(id){const e=entries.find(x=>x.id===id);if(e){e.collapsed=!e.collapsed;renderEntries();}}
-function saveField(id,field,val){const e=entries.find(x=>x.id===id);if(e){e[field]=val;autoDraft();}}
-function toggleGoal(id,n){const e=entries.find(x=>x.id===id);if(!e)return;const idx=e.goals.indexOf(n);if(idx===-1)e.goals.push(n);else e.goals.splice(idx,1);renderEntries();autoDraft();}
-
-function renderEntries(){
-  const goals=[gv('goal1'),gv('goal2'),gv('goal3')];
-  const con=document.getElementById('entries-container');if(!con)return;
-  if(!entries.length){con.innerHTML='<div class="empty-state"><div class="empty-icon">📝</div>No entries yet.<br/>Tap the button below to add one.</div>';return;}
-  con.innerHTML=entries.map((e,idx)=>{
-    const preview=e.behavior?e.behavior.substring(0,65)+(e.behavior.length>65?'…':''):'No behavior noted yet';
-    const tags=e.goals.map(g=>`<span class="goal-tag goal-${g}">G${g}</span>`).join('');
-    return`<div class="entry-card" id="entry-${e.id}">
-      <div class="entry-header" onclick="toggleCollapse(${e.id})">
-        <div class="entry-num">Entry ${idx+1} <span class="entry-time">${e.time}</span>${tags}</div>
-        <div style="display:flex;align-items:center;gap:8px;"><button class="entry-delete" onclick="event.stopPropagation();deleteEntry(${e.id})">×</button><span style="font-size:12px;color:var(--ink3)">${e.collapsed?'▼':'▲'}</span></div>
-      </div>
-      ${e.collapsed?`<div class="entry-preview">${preview}</div>`:`
-      <div class="entry-body">
-        <div class="field-row">
-          <div><label>Time</label><input type="time" value="${e.time}" onchange="saveField(${e.id},'time',this.value)"/></div>
-          <div><label>Goals</label><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
-            ${goals.map((g,i)=>g?`<label class="check-pill ${e.goals.includes(i+1)?'checked':''}" onclick="toggleGoal(${e.id},${i+1})"><input type="checkbox" style="display:none"/>G${i+1}</label>`:'').join('')}
-          </div></div>
-        </div>
-        <div class="field"><label>Antecedent (what happened before)</label><textarea rows="2" placeholder="Describe the situation..." onchange="saveField(${e.id},'antecedent',this.value)">${e.antecedent}</textarea></div>
-        <div class="field"><label>Behavior (child's response)</label><textarea rows="2" placeholder="Describe what the child did..." onchange="saveField(${e.id},'behavior',this.value)">${e.behavior}</textarea></div>
-        <div class="field"><label>Caregiver / educator intervention</label><textarea rows="2" placeholder="What did the teacher or caregiver do?" onchange="saveField(${e.id},'caregiverIntv',this.value)">${e.caregiverIntv}</textarea></div>
-        <div class="field"><label>BHT / TSS intervention</label><textarea rows="2" placeholder="What did you (BHT) do?" onchange="saveField(${e.id},'bhtIntv',this.value)">${e.bhtIntv}</textarea></div>
-        <div class="field"><label>Client's response</label><textarea rows="2" placeholder="How did the client respond?" onchange="saveField(${e.id},'response',this.value)">${e.response}</textarea></div>
-      </div>`}
-    </div>`;
-  }).join('');
-}
-
-function refreshSummary(){
-  document.getElementById('ov-client').textContent=gv('clientName')||'—';
-  const sd=gv('serviceDate');document.getElementById('ov-date').textContent=sd?new Date(sd+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
-  const st=gv('startTime'),et=gv('endTime');document.getElementById('ov-time').textContent=(st&&et)?`${st} – ${et}`:'—';
-  document.getElementById('ov-entries').textContent=entries.length;
-  const rv=document.querySelector('input[name="risk"]:checked')?.value||'No';
-  document.getElementById('ov-risk').innerHTML=`<span class="badge ${rv==='Yes'?'badge-warn':'badge-ok'}">${rv}</span>`;
-}
-
-function openPrint(){buildPrint();switchTab('print');}
-function fmt(id){return gv(id)||'';}
-function fmtDate(id){const v=gv(id);if(!v)return'';return new Date(v+'T12:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});}
-
-function buildPrint(){
-  const goals=[gv('goal1'),gv('goal2'),gv('goal3')].filter(Boolean);
-  const persons=getChecked('persons').join(', '),locs=getChecked('location').join(', ');
-  const riskVal=document.querySelector('input[name="risk"]:checked')?.value||'No';
-  const stVal=document.querySelector('input[name="sessionType"]:checked')?.value||'in-person';
-  const pages=[];for(let i=0;i<Math.max(1,entries.length);i+=4)pages.push(entries.slice(i,i+4));
-  if(!pages.length)pages.push([]);
-  const meta=`<div class="print-meta">
-    <div class="print-meta-row"><div class="pm-field">${stVal==='in-person'?'☑':'☐'} In person &nbsp; ${stVal==='telehealth'?'☑':'☐'} Telehealth &nbsp; ${stVal==='audio'?'☑':'☐'} Audio Only – Ph: ${gv('audioPh')}</div></div>
-    <div class="print-meta-row" style="font-weight:600;font-size:11px;text-align:center">Reason for Audio Only: ${gv('audioReason')}</div>
-    <div class="print-meta-row"><div class="pm-field"><span class="pm-label">Client Name:</span> <u>${fmt('clientName')}</u></div><div class="pm-field"><span class="pm-label">Service Date:</span> ${fmtDate('serviceDate')}</div><div class="pm-field"><span class="pm-label">Start:</span> ${fmt('startTime')}</div><div class="pm-field"><span class="pm-label">End:</span> ${fmt('endTime')}</div><div class="pm-field"><span class="pm-label">Total Hrs:</span> ${fmt('totalHrs')}</div></div>
-    <div class="print-meta-row"><div class="pm-field"><span class="pm-label">Persons Present:</span> ${persons}</div><div class="pm-field"><span class="pm-label">Location:</span> ${locs}</div></div>
-    <div class="pm-field"><span class="pm-label">Goals worked on:</span> ${goals.map((g,i)=>`${i+1}. ${g}`).join('  ')}</div></div>`;
-  const thead=`<table class="bt"><thead><tr><th style="width:24%">Antecedent<br/><small>(What occurred before)</small></th><th style="width:24%">Describe Behavior<br/><small>(Child's response)</small></th><th style="width:28%">Interventions Used by<br/><small>1. Caregiver/Educator &nbsp; 2. TSS</small></th><th style="width:24%">Client's Response<br/><small>to the intervention(s)</small></th></tr></thead><tbody>`;
-  let html='';
-  pages.forEach((pe,pi)=>{
-    html+=`<div style="${pi>0?'page-break-before:always;padding-top:12px;':''}"><div class="print-header"><div class="print-org">OMNI HEALTH SERVICES</div><div class="print-subtitle">BHT Daily Report</div></div>${meta}${thead}`;
-    if(!pe.length)html+=`<tr><td></td><td></td><td></td><td></td></tr>`.repeat(4);
-    else pe.forEach(e=>{html+=`<tr><td>${e.antecedent||''}</td><td>${e.behavior||''}</td><td>${e.caregiverIntv?'1. '+e.caregiverIntv:'1. '}${e.bhtIntv?'<br/><br/>2. '+e.bhtIntv:'<br/><br/>2.'}</td><td>${e.response||''}</td></tr>`;});
-    html+='</tbody></table>';
-    if(pi===pages.length-1)html+=`<div class="pfs"><div class="pfr"><span style="font-weight:600">At Risk Behavior:</span> &nbsp; ${riskVal==='No'?'☑ No &nbsp; ☐ Yes':'☐ No &nbsp; ☑ Yes'}</div><div class="pfr"><span style="font-weight:600">How Behavior Was Managed:</span> &nbsp; ${gv('mgmt')}</div><div class="pfr"><span style="font-weight:600">Transfer of Skills:</span> &nbsp; ${gv('transfer')}</div><div class="pfr"><span style="font-weight:600">Next Service Date with Plan:</span> &nbsp; ${fmtDate('nextDate')} &nbsp; ${gv('nextPlan')}</div><div class="pfr" style="margin-top:10px;"><span style="font-weight:600">*Staff Signature:</span> &nbsp; (BHT) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-weight:600">Staff Name:</span> &nbsp; ${gv('staffName')}</div><div class="psig">*My signature verifies that the information on this form is accurate. Submission of any false claims or statements is a Federal offense and punishable by law.</div></div>`;
-    html+='</div>';
-  });
-  document.getElementById('print-area').innerHTML=html;
-}
-
-// ── START ────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('startTime').value = '08:15';
-  document.getElementById('endTime').value = '16:15';
-  initAuth();
 });
+
+// Highlight nav item on scroll
+const sections = document.querySelectorAll('.section, .hero');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navItems.forEach(item => {
+        item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, {threshold: 0.3});
+sections.forEach(s => observer.observe(s));
 </script>
 </body>
 </html>
