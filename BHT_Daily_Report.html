@@ -1,0 +1,3502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BHT Daily Report – Omni Health Services</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#F7F6F2;--surface:#fff;--surface2:#F0EEE9;
+  --ink:#1A1917;--ink2:#6B6860;--ink3:#A09D96;
+  --accent:#2563EB;--accent-light:#EFF4FF;
+  --danger:#DC2626;--danger-light:#FEF2F2;
+  --success:#16A34A;--success-light:#F0FDF4;
+  --warn:#D97706;--warn-light:#FFFBEB;
+  --border:#E4E2DC;--border2:#CCC9C0;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.5;}
+
+/* HEADER */
+.header{background:var(--ink);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.header-left .org{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;opacity:.55;}
+.header-left .title{font-size:16px;font-weight:600;}
+.autosave-pill{font-size:12px;padding:5px 12px;border-radius:99px;font-weight:500;transition:all .3s;display:flex;align-items:center;gap:6px;}
+.pill-saved{background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.4);color:#4ADE80;}
+.pill-saving{background:rgba(217,119,6,.2);border:1px solid rgba(217,119,6,.4);color:#FCD34D;}
+.pill-new{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.pill-dot.pulse{animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* DATE BAR */
+.date-bar{background:var(--surface);border-bottom:2px solid var(--accent);padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:57px;z-index:199;}
+.date-bar label{font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap;}
+.date-input{flex:1;padding:10px 14px;border:2px solid var(--accent);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--ink);background:var(--accent-light);outline:none;-webkit-appearance:none;appearance:none;}
+.date-input:focus{box-shadow:0 0 0 3px rgba(37,99,235,.15);}
+.btn-load{padding:10px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-load:hover{background:#1d4ed8;}
+
+/* DATE STATUS */
+.date-status{padding:8px 16px;font-size:13px;font-weight:500;display:none;align-items:center;gap:8px;}
+.date-status.show{display:flex;}
+.date-status.existing{background:var(--success-light);color:var(--success);border-bottom:1px solid #BBF7D0;}
+.date-status.new-entry{background:var(--accent-light);color:var(--accent);border-bottom:1px solid #BFDBFE;}
+
+/* STICKY SAVE BAR — appears on all tabs */
+.save-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:none;align-items:center;gap:10px;position:sticky;top:107px;z-index:197;}
+.save-bar.show{display:flex;}
+.save-bar-btn{flex:1;padding:10px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;}
+.save-bar-btn:hover{background:#15803d;}
+.save-bar-btn:disabled{background:#86EFAC;cursor:not-allowed;}
+.save-bar-info{font-size:12px;color:var(--ink3);}
+
+/* TABS */
+.tab-bar{background:var(--surface);border-bottom:1px solid var(--border);display:none;overflow-x:auto;scrollbar-width:none;position:sticky;top:var(--tab-top,155px);z-index:196;}
+.tab-bar.show{display:flex;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab{padding:11px 16px;font-size:13px;font-weight:500;color:var(--ink3);border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer;transition:all .15s;user-select:none;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.tab:hover:not(.active){color:var(--ink2);}
+.tab-badge{font-size:10px;background:var(--accent);color:#fff;padding:1px 6px;border-radius:99px;margin-left:3px;font-weight:600;}
+
+/* VIEWS */
+.view{display:none;padding:16px;max-width:680px;margin:0 auto;}
+.view.active{display:block;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.card-title{font-size:13px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.card-title .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;}
+
+/* FORM */
+label{font-size:13px;color:var(--ink2);font-weight:500;display:block;margin-bottom:4px;}
+input[type=text],input[type=date],input[type=time],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--bg);transition:border .15s,box-shadow .15s;outline:none;-webkit-appearance:none;appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);background:#fff;}
+textarea{resize:vertical;min-height:80px;}
+.field{margin-bottom:12px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+
+/* PILLS */
+.check-group{display:flex;flex-wrap:wrap;gap:8px;}
+.check-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border2);border-radius:99px;font-size:13px;cursor:pointer;transition:all .15s;user-select:none;background:var(--bg);}
+.check-pill input{display:none;}
+.check-pill.checked{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:500;}
+
+/* ENTRIES */
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow);}
+.entry-header{background:var(--surface2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;}
+.entry-num{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.entry-time{font-family:'DM Mono',monospace;font-size:12px;background:var(--border);padding:2px 8px;border-radius:4px;}
+.entry-delete{color:var(--danger);font-size:20px;line-height:1;padding:2px 8px;border-radius:4px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.entry-delete:hover{background:var(--danger-light);}
+.entry-body{padding:14px;}
+.entry-section-label{font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;margin-top:10px;}
+.entry-loc-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.eloc-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid var(--border2);border-radius:99px;font-size:12px;cursor:pointer;background:var(--bg);color:var(--ink2);user-select:none;transition:all .15s;}
+.eloc-pill.on{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:600;}
+.entry-preview{font-size:12px;color:var(--ink3);padding:4px 14px 10px;}
+.goal-tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px;text-transform:uppercase;}
+.goal-1{background:#EEF2FF;color:#4338CA;}
+.goal-2{background:#F0FDF4;color:#166534;}
+.goal-3{background:#FEF2F2;color:#991B1B;}
+.add-entry-btn{width:100%;padding:14px;border:2px dashed var(--border2);border-radius:var(--radius);background:transparent;color:var(--ink2);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .15s;margin-bottom:12px;font-family:'DM Sans',sans-serif;}
+.add-entry-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+
+/* SUMMARY */
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.summary-row:last-child{border-bottom:none;}
+.summary-label{color:var(--ink2);}
+.summary-value{font-weight:500;}
+.badge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;}
+.badge-ok{background:var(--success-light);color:var(--success);}
+.badge-warn{background:var(--warn-light);color:var(--warn);}
+
+/* RECORDS */
+.report-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;transition:all .15s;}
+.report-row:hover{border-color:var(--accent);background:var(--accent-light);}
+.report-client{font-weight:600;font-size:14px;}
+.report-meta{font-size:12px;color:var(--ink3);margin-top:2px;}
+.report-btns{display:flex;gap:6px;flex-shrink:0;}
+.btn-sm{padding:7px 12px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--ink2);}
+.btn-sm:hover{background:var(--surface2);}
+.btn-accent{background:var(--accent-light);color:var(--accent);border-color:var(--accent);}
+.btn-danger{background:var(--danger-light);color:var(--danger);border-color:var(--danger);}
+.btn-success{background:var(--success-light);color:var(--success);border-color:var(--success);}
+
+/* PRINT */
+.print-container{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:8px 4px;font-size:13px;color:#000;margin-bottom:16px;}
+.print-page{page-break-before:auto;}
+.print-page + .print-page{page-break-before:always;}
+.print-header{text-align:center;margin-bottom:6px;border-bottom:2px solid #000;padding-bottom:6px;}
+.print-org{font-size:15px;font-weight:700;letter-spacing:.03em;}
+.print-subtitle{font-size:13px;font-weight:600;}
+.print-page-info{font-size:10px;color:#666;text-align:right;margin-bottom:4px;}
+.print-meta{border:1px solid #ccc;padding:7px 10px;border-radius:4px;margin-bottom:8px;font-size:11.5px;}
+.print-meta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4px;}
+.print-meta-row:last-child{margin-bottom:0;}
+.pm-field{display:flex;gap:4px;align-items:baseline;}
+.pm-label{font-weight:700;}
+table.bt{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;table-layout:fixed;}
+table.bt th{background:#eee;border:1px solid #bbb;padding:5px 6px;text-align:center;font-weight:700;font-size:10px;}
+table.bt td{border:1px solid #bbb;padding:6px 7px;vertical-align:top;word-wrap:break-word;overflow-wrap:break-word;min-height:72px;height:72px;}
+table.bt tr.empty-row td{height:72px;color:#ccc;font-style:italic;font-size:10px;text-align:center;vertical-align:middle;}
+.pfs{border:1px solid #ccc;padding:8px 10px;border-radius:4px;font-size:11.5px;}
+.pfr{margin-bottom:6px;display:flex;gap:6px;flex-wrap:wrap;}
+.pfr:last-child{margin-bottom:0;}
+.psig{margin-top:8px;padding-top:8px;border-top:1px solid #ccc;font-size:10.5px;font-style:italic;color:#555;}
+
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--ink);color:#fff;padding:11px 22px;border-radius:99px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.hint{font-size:12px;color:var(--ink3);margin-top:4px;text-align:center;}
+.section-label{font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+.entry-count{font-size:12px;color:var(--ink3);font-family:'DM Mono',monospace;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+
+@media(max-width:420px){.field-row{grid-template-columns:1fr;}}
+
+/* IMPORT MODAL */
+.import-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.import-modal-overlay.open{opacity:1;pointer-events:all;}
+.import-modal-box{background:var(--surface);border-radius:var(--radius);width:90%;max-width:460px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.import-modal-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.import-modal-desc{font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.5;}
+.import-preview{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:12px;color:var(--ink2);max-height:160px;overflow-y:auto;display:none;}
+.import-preview-row{padding:3px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;}
+.import-preview-row:last-child{border-bottom:none;}
+.import-modal-btns{display:flex;gap:10px;}
+.btn-import-go{flex:1;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+.btn-import-go:disabled{background:#93C5FD;cursor:not-allowed;}
+.btn-import-cancel{padding:11px 16px;background:var(--surface2);color:var(--ink2);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;}
+
+/* GROUP SESSION TIME MODAL */
+.grptime-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.grptime-overlay.open{opacity:1;pointer-events:all;}
+.grptime-box{background:var(--surface);border-radius:var(--radius);width:90%;max-width:400px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.grptime-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.grptime-desc{font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.5;}
+.grptime-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.grptime-field label{font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:4px;}
+.grptime-field input{width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
+.grptime-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.grptime-hrs{font-size:12px;color:var(--accent);font-weight:600;margin-bottom:16px;}
+.grptime-btns{display:flex;gap:10px;}
+.grptime-save{flex:1;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+.grptime-skip{padding:11px 16px;background:var(--surface2);color:var(--ink2);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;}
+
+/* EXPORT MODAL */
+.export-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.export-modal-overlay.open{opacity:1;pointer-events:all;}
+.export-modal-box{background:var(--surface);border-radius:var(--radius);width:90%;max-width:440px;padding:24px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.export-modal-title{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.export-modal-desc{font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.5;}
+.export-drop-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;margin-bottom:16px;transition:all .15s;background:var(--bg);}
+.export-drop-zone:hover{border-color:var(--accent);background:var(--accent-light);}
+.export-drop-zone.has-file{border-color:var(--success);background:var(--success-light);}
+.export-drop-label{font-size:13px;color:var(--ink2);}
+.export-drop-label span{color:var(--accent);font-weight:600;}
+.export-modal-btns{display:flex;gap:10px;}
+.btn-export-go{flex:1;padding:11px;background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+.btn-export-go:hover{background:#15803d;}
+.btn-export-ignore{flex:1;padding:11px;background:var(--surface2);color:var(--ink2);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
+.btn-export-cancel{padding:11px 16px;background:none;color:var(--ink3);border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+
+/* SETTINGS */
+.settings-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
+.settings-section-title{font-size:12px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.settings-section-title .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;}
+.goal-item{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.goal-item input{flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--bg);outline:none;}
+.goal-item input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.btn-del-goal{width:32px;height:32px;border-radius:50%;border:none;background:var(--danger-light);color:var(--danger);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.btn-add-goal{width:100%;padding:10px;border:2px dashed var(--border2);border-radius:var(--radius-sm);background:transparent;color:var(--ink2);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;margin-top:4px;}
+.btn-add-goal:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+.sig-preview{margin-top:10px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);display:none;align-items:center;gap:12px;}
+.sig-preview.show{display:flex;}
+.sig-preview img{max-height:50px;max-width:150px;object-fit:contain;}
+.btn-save-settings{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+.btn-save-settings:hover{background:#1d4ed8;}
+.settings-check-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+
+/* PAST BEHAVIOR MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:720px;max-height:90vh;display:flex;flex-direction:column;transform:translateY(40px);transition:transform .25s;overflow:hidden;}
+.modal-overlay.open .modal-sheet{transform:translateY(0);}
+.modal-header{padding:16px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-title{font-size:15px;font-weight:700;color:var(--ink);}
+.modal-subtitle{font-size:12px;color:var(--ink3);margin-top:2px;}
+.modal-close{width:30px;height:30px;border-radius:50%;border:none;background:var(--surface2);color:var(--ink2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-toolbar{padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+.modal-search{flex:1;min-width:140px;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--bg);}
+.modal-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.modal-filter{padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);outline:none;color:var(--ink);cursor:pointer;}
+.modal-sel-info{font-size:12px;color:var(--accent);font-weight:600;white-space:nowrap;}
+.modal-body{overflow-y:auto;flex:1;padding:12px 16px;}
+.pbh-date-group{margin-bottom:16px;}
+.pbh-date-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;padding:0 2px;}
+.pbh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;}
+.pbh-card{border:2px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:all .15s;background:var(--surface);position:relative;user-select:none;}
+.pbh-card:hover{border-color:var(--accent);background:var(--accent-light);}
+.pbh-card.selected{border-color:var(--accent);background:var(--accent-light);}
+.pbh-check{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;}
+.pbh-card.selected .pbh-check{background:var(--accent);border-color:var(--accent);color:#fff;}
+.pbh-behavior{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;line-height:1.4;}
+.pbh-meta{font-size:11px;color:var(--ink3);display:flex;flex-wrap:wrap;gap:6px;}
+.pbh-tag{background:var(--surface2);border-radius:4px;padding:2px 7px;font-size:11px;}
+.pbh-tag.ant{background:#EFF4FF;color:#2563EB;}
+.pbh-tag.res{background:#F0FDF4;color:#16A34A;}
+.pbh-empty{text-align:center;padding:40px 20px;color:var(--ink3);}
+.modal-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;}
+.btn-import{flex:1;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;}
+.btn-import:hover{background:#1d4ed8;}
+.btn-import:disabled{background:#93C5FD;cursor:not-allowed;}
+.btn-cancel-modal{padding:12px 18px;background:var(--surface2);color:var(--ink2);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
+
+/* DATA SHEET */
+.ds-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.ds-header-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;}
+.ds-grid-wrap{overflow-x:auto;margin-bottom:12px;}
+.ds-grid{border-collapse:collapse;width:100%;min-width:700px;font-size:12px;}
+.ds-grid th,.ds-grid td{border:1px solid #999;padding:4px 3px;text-align:center;vertical-align:middle;}
+.ds-grid th{background:#f0f0f0;font-size:10px;font-weight:700;}
+.ds-grid .ds-behavior-cell{text-align:left;padding:6px 8px;font-size:9px;min-width:120px;max-width:150px;}
+.ds-grid .ds-behavior-cell .ds-t{font-weight:700;color:var(--ink);}
+.ds-grid .ds-behavior-cell .ds-r{color:var(--ink2);font-size:8px;}
+.ds-count-cell{position:relative;cursor:pointer;}
+.ds-tally{display:flex;align-items:center;justify-content:center;gap:1px;height:32px;}
+.ds-tally-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.ds-count-input{width:32px;height:28px;text-align:center;border:none;background:transparent;font-size:13px;font-weight:600;color:var(--accent);outline:none;cursor:pointer;}
+.ds-count-input::-webkit-inner-spin-button,.ds-count-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.ds-total-cell{font-weight:700;color:var(--accent);font-size:10px;}
+.ds-print-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:8px;}
+.ds-new-btn{width:100%;padding:10px;background:var(--surface);border:1px solid var(--accent);color:var(--accent);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:12px;}
+.ds-saved-list{margin-top:4px;}
+.ds-saved-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+
+/* DATA SHEET PRINT */
+/* ── MOBILE RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 600px) {
+
+  /* Base font scale down slightly */
+  body { font-size: 14px; }
+
+  /* Header */
+  .header { padding: 10px 14px; }
+  .header-left .title { font-size: 14px; }
+  .header-right { font-size: 11px; }
+
+  /* Date bar — stack on very small screens */
+  .date-bar { padding: 8px 12px; gap: 8px; }
+  .date-input { font-size: 14px; padding: 8px 10px; }
+  .date-bar .btn-primary, .date-bar button { padding: 8px 14px; font-size: 13px; }
+
+  /* Save bar */
+  .save-bar { padding: 6px 12px; gap: 8px; }
+  .save-bar-btn { padding: 9px; font-size: 13px; }
+  .save-bar-info { font-size: 11px; }
+
+  /* Tab bar — scrollable, bigger touch targets */
+  .tab-bar { top: 100px; }
+  .tab { padding: 10px 14px; font-size: 12px; white-space: nowrap; }
+
+  /* Views */
+  .view { padding: 12px 12px; }
+  .card, .settings-section, .ts-card, .ds-card { padding: 12px; }
+  .card-title { font-size: 12px; }
+
+  /* Field rows — single column on mobile */
+  .field-row { grid-template-columns: 1fr !important; gap: 10px; }
+  .field label { font-size: 12px; }
+  .field input, .field textarea, .field select { font-size: 14px; padding: 9px 12px; }
+
+  /* Check pills — smaller on mobile */
+  .check-pill { padding: 6px 12px; font-size: 13px; }
+  .check-group { gap: 6px; }
+
+  /* Entry cards */
+  .entry-header { padding: 10px 12px; }
+  .entry-num { font-size: 11px; }
+  .entry-body { padding: 12px; }
+  .eloc-pill { padding: 5px 10px; font-size: 12px; }
+
+  /* Report rows — stack on mobile */
+  .report-row { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px; }
+  .report-btns { width: 100%; display: flex; gap: 8px; }
+  .report-btns button, .btn-sm { flex: 1; padding: 8px; font-size: 13px; }
+  .report-client { font-size: 14px; }
+  .report-meta { font-size: 11px; }
+
+  /* Add entry button */
+  .add-entry-btn { padding: 12px; font-size: 13px; }
+
+  /* Buttons */
+  .btn-primary { padding: 11px 16px; font-size: 13px; }
+  .btn-save-settings { padding: 12px; font-size: 14px; }
+
+  /* Print tab */
+  #view-print .no-print button { font-size: 14px; padding: 14px; }
+
+  /* Session times panel */
+  .grptime-fields { grid-template-columns: 1fr !important; }
+  #grp-times-rows > div > div:last-child { grid-template-columns: 1fr 1fr !important; }
+
+  /* Data sheet grid — horizontal scroll */
+  .ds-grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .ds-grid { min-width: 600px; }
+  .ds-count-input { width: 28px; height: 26px; font-size: 12px; }
+
+  /* Timesheet */
+  .ts-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .ts-table { min-width: 600px; font-size: 11px; }
+  .ts-week-nav { flex-wrap: wrap; gap: 8px; }
+  .ts-week-nav button { padding: 8px 12px; font-size: 12px; }
+  .ts-week-display { font-size: 13px; min-width: 100%; text-align: center; }
+
+  /* All reports select all row */
+  #all-records-list > div:first-child { flex-wrap: wrap; gap: 8px; }
+
+  /* Modal sheets */
+  .modal-sheet { max-height: 95vh; border-radius: 16px 16px 0 0; }
+  .grptime-box { width: 95%; padding: 18px; }
+  .export-modal-box, .import-modal-box { width: 95%; padding: 18px; }
+
+  /* Settings goals */
+  .goal-row { gap: 8px; }
+  .goal-row input { font-size: 13px; }
+
+  /* Summary tab */
+  .print-meta-row { flex-direction: column; gap: 8px; }
+}
+
+  /* Session times grid on mobile */
+  .grp-time-grid { grid-template-columns: 1fr 1fr !important; }
+  .grp-time-grid button { grid-column: 1 / -1; }
+
+@media (max-width: 380px) {
+  .tab { padding: 9px 10px; font-size: 11px; }
+  .header-left .title { font-size: 13px; }
+  .check-pill { padding: 5px 10px; font-size: 12px; }
+}
+
+/* Touch-friendly tap targets for all interactive elements */
+@media (hover: none) and (pointer: coarse) {
+  .check-pill, .eloc-pill, .tab, .btn-sm, .btn-primary,
+  .add-entry-btn, .save-bar-btn, .btn-save-settings,
+  .ts-print-btn, .ds-print-btn, .ds-new-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .check-group { gap: 8px; }
+  /* Tally cells bigger for finger taps */
+  .ds-count-cell { min-width: 44px; min-height: 44px; }
+  /* Entry collapse toggle bigger */
+  .entry-header { min-height: 50px; }
+}
+
+@media print{
+  .ds-print-only{display:block!important;}
+}
+.ds-print-only{display:none;}
+
+/* TIMESHEET */
+.ts-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.ts-week-label{font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:4px;}
+.ts-week-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.ts-week-nav button{padding:6px 14px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--ink2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+.ts-week-nav button:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.ts-week-display{font-size:14px;font-weight:700;color:var(--ink);flex:1;text-align:center;}
+.ts-table-wrap{overflow-x:auto;margin-bottom:12px;}
+.ts-table{border-collapse:collapse;width:100%;min-width:700px;font-size:12px;}
+.ts-table th{background:#f0f0f0;border:1px solid #ccc;padding:6px 5px;text-align:center;font-size:11px;font-weight:700;white-space:nowrap;}
+.ts-table td{border:1px solid #ccc;padding:2px 3px;vertical-align:middle;}
+.ts-table td input{width:100%;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;padding:3px 4px;outline:none;text-align:center;}
+.ts-table td input:focus{background:var(--accent-light);}
+.ts-table td.ts-name-cell input{text-align:left;}
+.ts-summary-row{display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--ink2);padding:8px 0;}
+.ts-summary-row span{font-weight:700;color:var(--ink);}
+.ts-print-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:8px;}
+
+@page{size:A4 landscape;margin-top:0mm;margin-bottom:0mm;margin-left:10mm;margin-right:10mm;}
+@page portrait-page{size:A4 portrait;margin:10mm 12mm;}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  html,body{margin:0!important;padding:0!important;background:#fff;}
+  .header,.date-bar,.date-status,.save-bar,.tab-bar,.view:not(#view-print),.add-entry-btn,.toast,.no-print,.modal-overlay{display:none!important;}
+  #view-print{display:block!important;padding:0!important;margin:0!important;max-width:none!important;}
+  .print-container{border:none!important;padding:0!important;margin:0!important;box-shadow:none!important;border-radius:0!important;}
+  .print-page{page-break-before:auto;page-break-inside:avoid;margin:0!important;padding:0!important;}
+  .print-page + .print-page{page-break-before:always;}
+  .print-page-portrait{page:portrait-page;page-break-before:always;page-break-inside:avoid;}
+  .view{max-width:none!important;padding:0!important;margin:0!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="org">Omni Health Services</div>
+    <div class="title">BHT Daily Report</div>
+  </div>
+  <div class="autosave-pill pill-new" id="status-pill">
+    <span class="pill-dot" id="pill-dot"></span>
+    <span id="pill-text">Select a date</span>
+  </div>
+</div>
+
+<!-- DATE BAR -->
+<div class="date-bar">
+  <label>📅 Date:</label>
+  <input type="date" id="main-date" class="date-input" onchange="onDateChange()"/>
+  <button class="btn-load" onclick="onDateChange()">Load / New</button>
+</div>
+
+<!-- DATE STATUS -->
+<div class="date-status" id="date-status"></div>
+
+<!-- STICKY SAVE BAR — visible on all tabs once date is selected -->
+<div class="save-bar" id="save-bar">
+  <button class="save-bar-btn" id="save-bar-btn" onclick="saveReport()">
+    💾 Save
+  </button>
+  <div class="save-bar-info" id="save-bar-info">Not saved yet</div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar" id="tab-bar">
+  <div class="tab active" onclick="switchTab('session')" id="tab-session">Session Info</div>
+  <div class="tab" onclick="switchTab('behaviors')" id="tab-behaviors">Behaviors <span class="tab-badge" id="entry-badge" style="display:none">0</span></div>
+  <div class="tab" onclick="switchTab('summary')" id="tab-summary">Summary</div>
+  <div class="tab" onclick="switchTab('records')" id="tab-records">All Reports</div>
+  <div class="tab" onclick="switchTab('print')" id="tab-print">Print</div>
+  <div class="tab" onclick="switchTab('settings')" id="tab-settings">⚙ Settings</div>
+  <div class="tab" onclick="switchTab('datasheet')" id="tab-datasheet">📊 Data Sheet</div>
+  <div class="tab" onclick="switchTab('timesheet')" id="tab-timesheet">🗓 Timesheet</div>
+</div>
+
+<!-- SESSION INFO -->
+<div class="view active" id="view-session">
+  <div class="empty-state" id="no-date-msg">
+    <div class="empty-icon">📅</div>
+    <div style="font-weight:600;font-size:16px;color:var(--ink2);margin-bottom:8px;">Select a service date to begin</div>
+    <div>Pick a date above — existing records load automatically,<br/>or start fresh for a new date.</div>
+  </div>
+  <div id="session-form" style="display:none;">
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Session type</div>
+      <div class="check-group">
+        <label class="check-pill checked" onclick="togglePill(this,'sessionType','in-person')"><input type="radio" name="sessionType" value="in-person" checked/>✓ In person</label>
+        <label class="check-pill" onclick="togglePill(this,'sessionType','telehealth')"><input type="radio" name="sessionType" value="telehealth"/>Telehealth</label>
+        <label class="check-pill" onclick="togglePill(this,'sessionType','audio')"><input type="radio" name="sessionType" value="audio"/>Audio Only</label>
+      </div>
+      <div id="audio-ph" style="display:none;margin-top:10px;">
+        <div class="field"><label>Phone number</label><input type="text" id="audioPh" placeholder="Phone number" oninput="triggerAutoSave()"/></div>
+        <div class="field"><label>Reason for Audio Only</label><input type="text" id="audioReason" placeholder="Reason..." oninput="triggerAutoSave()"/></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Client & session details</div>
+      <div class="field"><label>Client name</label><input type="text" id="clientName" value="Bruce Ford Carter II" oninput="triggerAutoSave()"/></div>
+      <div class="field-row">
+        <div><label>Total hours</label><input type="text" id="totalHrs" value="8" oninput="triggerAutoSave()"/></div>
+        <div><label>Start time</label><input type="time" id="startTime" onchange="calcHours();triggerAutoSave()"/></div>
+      </div>
+      <div class="field"><label>End time</label><input type="time" id="endTime" onchange="calcHours();triggerAutoSave()"/></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Persons present</div>
+      <div class="check-group">
+        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="persons" value="Parent"/>Parent</label>
+        <label class="check-pill checked" onclick="toggleCheck(this)"><input type="checkbox" name="persons" value="Teacher" checked/>Teacher</label>
+        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="persons" value="BC"/>BC</label>
+        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="persons" value="Other"/>Other</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Location</div>
+      <div class="check-group">
+        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="location" value="Home"/>Home</label>
+        <label class="check-pill checked" onclick="toggleCheck(this)"><input type="checkbox" name="location" value="School" checked/>School</label>
+        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="location" value="Community"/>Community</label>
+        <label class="check-pill" onclick="toggleCheck(this)"><input type="checkbox" name="location" value="Camp"/>Camp</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Goals worked on</div>
+      <div id="goals-container">
+        <div class="field"><label>Goal 1</label><input type="text" id="goal1" value="Decrease Non-compliant Behaviors" oninput="triggerAutoSave()"/></div>
+        <div class="field"><label>Goal 2</label><input type="text" id="goal2" value="Increase Social Skills" oninput="triggerAutoSave()"/></div>
+        <div class="field"><label>Goal 3</label><input type="text" id="goal3" value="Decrease Aggression" oninput="triggerAutoSave()"/></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEHAVIORS -->
+<div class="view" id="view-behaviors">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div class="section-label">Behavior entries</div>
+    <div class="entry-count" id="entry-count-label">0 entries</div>
+  </div>
+  <div id="entries-container"></div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <button class="add-entry-btn" style="flex:1;margin-bottom:0;" onclick="addEntry()"><span style="font-size:20px">+</span> New entry</button>
+    <button class="add-entry-btn" style="flex:1;margin-bottom:0;border-color:var(--accent);color:var(--accent);" onclick="openPastBehaviorsModal()"><span style="font-size:18px">&#x1F4CB;</span> Copy from past</button>
+  </div>
+</div>
+
+<!-- PAST BEHAVIORS MODAL -->
+<div class="modal-overlay" id="past-modal" onclick="handleModalOverlayClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">&#x1F4CB; Copy Past Behaviors</div>
+        <div class="modal-subtitle">Select behaviors from any previous session to copy into today</div>
+      </div>
+      <button class="modal-close" onclick="closePastModal()">x</button>
+    </div>
+    <div class="modal-toolbar">
+      <input class="modal-search" id="pbh-search" type="text" placeholder="Search behaviors..." oninput="renderPastBehaviors()"/>
+      <select class="modal-filter" id="pbh-filter" onchange="renderPastBehaviors()">
+        <option value="">All dates</option>
+      </select>
+      <span class="modal-sel-info" id="pbh-sel-info" style="display:none"></span>
+    </div>
+    <div class="modal-body" id="pbh-body"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel-modal" onclick="closePastModal()">Cancel</button>
+      <button class="btn-import" id="pbh-import-btn" onclick="importSelectedBehaviors()" disabled>Copy Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="view" id="view-summary">
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>At-risk behavior</div>
+    <div class="check-group">
+      <label class="check-pill checked" id="risk-no" onclick="setRisk('No')"><input type="radio" name="risk" value="No" checked/>No</label>
+      <label class="check-pill" id="risk-yes" onclick="setRisk('Yes')"><input type="radio" name="risk" value="Yes"/>Yes</label>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Wrap-up details</div>
+    <div class="field"><label>How behavior was managed</label><textarea id="mgmt" rows="3" placeholder="e.g. Modeling using words, setting a timer, taking him for a walk and redirecting." oninput="triggerAutoSave()"></textarea></div>
+    <div class="field"><label>Transfer of skills</label><textarea id="transfer" rows="2" placeholder="e.g. Taking sensory breaks to reduce anger, turn-taking." oninput="triggerAutoSave()"></textarea></div>
+    <div class="field-row">
+      <div><label>Next service date</label><input type="date" id="nextDate" onchange="triggerAutoSave()"/></div>
+      <div><label>Plan for next session</label><input type="text" id="nextPlan" placeholder="Brief plan..." oninput="triggerAutoSave()"/></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Staff</div>
+    <div class="field"><label>Staff name</label><input type="text" id="staffName" value="Yasoda Vegi" placeholder="Yasoda Vegi" oninput="triggerAutoSave()"/></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Session overview</div>
+    <div class="summary-row"><span class="summary-label">Service date</span><span class="summary-value" id="ov-date">—</span></div>
+    <div class="summary-row"><span class="summary-label">Client</span><span class="summary-value" id="ov-client">—</span></div>
+    <div class="summary-row"><span class="summary-label">Time</span><span class="summary-value" id="ov-time">—</span></div>
+    <div class="summary-row"><span class="summary-label">Behavior entries</span><span class="summary-value" id="ov-entries">—</span></div>
+    <div class="summary-row"><span class="summary-label">At-risk</span><span class="summary-value" id="ov-risk">—</span></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <button class="btn-sm btn-accent" onclick="switchTab('print')" style="flex:1;padding:10px;">🖨 Print / PDF</button>
+  </div>
+</div>
+
+<!-- ALL REPORTS -->
+<div class="view" id="view-records">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div class="section-label">All saved reports</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-sm btn-success" onclick="openExportModal()">&#x1F4E4; Export to Local</button>
+      <button class="btn-sm btn-accent" onclick="openImportModal()">&#x1F4E5; Import from Local</button>
+      <button class="btn-sm" onclick="exportCSV()">&#x1F4C5; Export CSV</button>
+    </div>
+  </div>
+  <div id="all-records-list"></div>
+</div>
+
+<!-- GROUP SESSION TIME MODAL -->
+<div class="grptime-overlay" id="grptime-modal">
+  <div class="grptime-box">
+    <div class="grptime-title" id="grptime-title">&#x1F4CD; Session Time for This Location</div>
+    <div class="grptime-desc" id="grptime-desc">This incident has a different location/persons than your main session. Please enter the start and end time for this session.</div>
+    <div class="grptime-fields">
+      <div class="grptime-field"><label>Start Time</label><input type="time" id="grptime-start" oninput="calcGrpHrs()"/></div>
+      <div class="grptime-field"><label>End Time</label><input type="time" id="grptime-end" oninput="calcGrpHrs()"/></div>
+    </div>
+    <div class="grptime-hrs" id="grptime-hrs"></div>
+    <div class="grptime-btns">
+      <button class="grptime-skip" onclick="closeGrpTimeModal()">Skip for now</button>
+      <button class="grptime-save" onclick="saveGrpTime()">&#x2713; Save Time</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT TO LOCAL MODAL -->
+<div class="export-modal-overlay" id="export-modal">
+  <div class="export-modal-box">
+    <div class="export-modal-title">&#x1F4E4; Export to Local Excel</div>
+    <div class="export-modal-desc">
+      Do you have an existing <strong>BHT_Reports.xlsx</strong> file to merge with?<br/>
+      Upload it to add only new records. Or click <strong>Ignore</strong> to export all current data fresh.
+    </div>
+    <div class="export-drop-zone" id="export-drop-zone" onclick="document.getElementById('excel-file-input').click()">
+      <div class="export-drop-label" id="export-drop-label">
+        &#x1F4C2; <span>Click to upload</span> existing BHT_Reports.xlsx
+      </div>
+      <input type="file" id="excel-file-input" accept=".xlsx" style="display:none" onchange="onExcelFileSelected(this)"/>
+    </div>
+    <div class="export-modal-btns">
+      <button class="btn-export-ignore" onclick="doExport(null)">Ignore &amp; Export Fresh</button>
+      <button class="btn-export-go" id="btn-export-merge" onclick="doExportMerge()" disabled>&#x1F504; Merge &amp; Export</button>
+    </div>
+    <div style="text-align:center;margin-top:8px;">
+      <button class="btn-export-cancel" onclick="closeExportModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT FROM LOCAL MODAL -->
+<div class="import-modal-overlay" id="import-modal">
+  <div class="import-modal-box">
+    <div class="import-modal-title">&#x1F4E5; Import from Local Excel</div>
+    <div class="import-modal-desc">
+      Upload your <strong>BHT_Reports.xlsx</strong> file to restore all your data back into the browser.<br/>
+      <span style="color:var(--warn);font-weight:600;">&#x26A0; Existing browser data for matching dates will be updated.</span>
+    </div>
+    <div class="export-drop-zone" id="import-drop-zone" onclick="document.getElementById('import-file-input').click()">
+      <div class="export-drop-label" id="import-drop-label">
+        &#x1F4C2; <span>Click to upload</span> BHT_Reports.xlsx
+      </div>
+      <input type="file" id="import-file-input" accept=".xlsx" style="display:none" onchange="onImportFileSelected(this)"/>
+    </div>
+    <div class="import-preview" id="import-preview"></div>
+    <div class="import-modal-btns">
+      <button class="btn-import-cancel" onclick="closeImportModal()">Cancel</button>
+      <button class="btn-import-go" id="btn-import-go" onclick="doImport()" disabled>&#x2705; Restore to Browser</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PRINT -->
+<div class="view" id="view-print">
+  <div class="no-print" style="margin-bottom:14px;">
+    <button style="width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="window.print()">&#128424; Print / Save PDF</button>
+    <div id="grp-times-panel" style="display:none;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:6px;"><span style="font-size:14px;">&#x23F0;</span> Session Times per Location Group</div>
+      <div id="grp-times-rows"></div>
+
+    </div>
+  </div>
+  <div class="print-container" id="print-area"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="view" id="view-settings">
+
+  <div class="settings-section">
+    <div class="settings-section-title"><span class="dot"></span>Client Details</div>
+    <div class="field"><label>Default Client Name</label><input type="text" id="cfg-clientName" placeholder="e.g. Bruce Ford Carter II"/></div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title"><span class="dot"></span>Staff Details</div>
+    <div class="field"><label>Staff Name</label><input type="text" id="cfg-staffName" placeholder="e.g. Yasoda Vegi"/></div>
+    <div class="field">
+      <label>Signature Image</label>
+      <div class="export-drop-zone" id="sig-drop-zone" onclick="document.getElementById('sig-upload').click()" style="padding:14px;">
+        <div class="export-drop-label" id="sig-drop-label">&#x270D; <span>Click to upload</span> signature image (PNG/JPG)</div>
+        <input type="file" id="sig-upload" accept="image/*" style="display:none" onchange="onSigUpload(this)"/>
+      </div>
+      <div class="sig-preview" id="sig-preview">
+        <img id="sig-preview-img" src="" alt="Signature preview"/>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--success);">&#x2713; Signature loaded</div>
+          <button onclick="clearSig()" style="font-size:12px;color:var(--danger);background:none;border:none;cursor:pointer;padding:0;margin-top:4px;">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title"><span class="dot"></span>Session Defaults</div>
+    <div class="field">
+      <label>Default Session Type</label>
+      <div class="settings-check-group">
+        <label class="check-pill" id="cfg-pill-inperson" onclick="setCfgSession('in-person',this)"><input type="radio" name="cfg-session" value="in-person"/>&#x2713; In person</label>
+        <label class="check-pill" id="cfg-pill-telehealth" onclick="setCfgSession('telehealth',this)"><input type="radio" name="cfg-session" value="telehealth"/>Telehealth</label>
+        <label class="check-pill" id="cfg-pill-audio" onclick="setCfgSession('audio',this)"><input type="radio" name="cfg-session" value="audio"/>Audio Only</label>
+      </div>
+    </div>
+    <div class="field-row">
+      <div><label>Default Start Time</label><input type="time" id="cfg-startTime"/></div>
+      <div><label>Default End Time</label><input type="time" id="cfg-endTime"/></div>
+    </div>
+    <div class="field"><label>Default Total Hours <span style="font-size:11px;color:var(--ink3)">(auto-calculated from times above)</span></label><input type="text" id="cfg-totalHrs" placeholder="e.g. 8" readonly style="background:var(--surface2);color:var(--ink2);"/></div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title"><span class="dot"></span>Default Persons Present</div>
+    <div class="settings-check-group" id="cfg-persons-group">
+      <label class="check-pill" onclick="toggleCfgCheck(this)"><input type="checkbox" name="cfg-persons" value="Parent"/>Parent</label>
+      <label class="check-pill" onclick="toggleCfgCheck(this)"><input type="checkbox" name="cfg-persons" value="Teacher"/>Teacher</label>
+      <label class="check-pill" onclick="toggleCfgCheck(this)"><input type="checkbox" name="cfg-persons" value="BC"/>BC</label>
+      <label class="check-pill" onclick="toggleCfgCheck(this)"><input type="checkbox" name="cfg-persons" value="Other"/>Other</label>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title"><span class="dot"></span>Default Location</div>
+    <div class="settings-check-group" id="cfg-location-group">
+      <label class="check-pill" onclick="toggleCfgCheck(this)"><input type="checkbox" name="cfg-location" value="Home"/>Home</label>
+      <label class="check-pill" onclick="toggleCfgCheck(this)"><input type="checkbox" name="cfg-location" value="School"/>School</label>
+      <label class="check-pill" onclick="toggleCfgCheck(this)"><input type="checkbox" name="cfg-location" value="Community"/>Community</label>
+      <label class="check-pill" onclick="toggleCfgCheck(this)"><input type="checkbox" name="cfg-location" value="Camp"/>Camp</label>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title"><span class="dot"></span>Summary Defaults</div>
+    <div class="field"><label>How Behavior Was Managed</label><textarea id="cfg-mgmt" rows="3" oninput="" style="font-size:13px;"></textarea></div>
+    <div class="field"><label>Transfer of Skills</label><textarea id="cfg-transfer" rows="2" oninput="" style="font-size:13px;"></textarea></div>
+    <div class="field"><label>Plan for Next Session</label><input type="text" id="cfg-nextPlan" placeholder="e.g. Role playing social scenarios..."/></div>
+    <div class="hint" style="text-align:left;margin-top:4px;color:var(--ink3);font-size:12px;">&#x1F4C5; Next Service Date auto-fills to next working day from report date</div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title"><span class="dot"></span>Goals <span style="font-size:11px;font-weight:400;color:var(--ink3);text-transform:none;letter-spacing:0;">(add up to any number)</span></div>
+    <div id="cfg-goals-list"></div>
+    <button class="btn-add-goal" onclick="addCfgGoal('')">+ Add Goal</button>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title"><span class="dot"></span>Data Collection — Behavior Definitions</div>
+    <div style="font-size:12px;color:var(--ink3);margin-bottom:12px;">These appear at the bottom of the printed Data Collection Form</div>
+    <div class="field"><label>Behavior 1 — Target (T)</label><input type="text" id="cfg-b1t" placeholder="e.g. Bruce is non-complying"/></div>
+    <div class="field"><label>Behavior 1 — Replacement (R)</label><input type="text" id="cfg-b1r" placeholder="e.g. Bruce will cooperate and be complying towards adults"/></div>
+    <div class="field"><label>Behavior 1 — Full Definition</label><textarea id="cfg-b1def" rows="3" style="font-size:13px;" placeholder="Full description of this behavior..."></textarea></div>
+    <div class="field"><label>Behavior 2 — Target (T)</label><input type="text" id="cfg-b2t" placeholder="e.g. Bruce will increase social skills"/></div>
+    <div class="field"><label>Behavior 2 — Replacement (R)</label><input type="text" id="cfg-b2r" placeholder="e.g. Bruce will exhibit socialization skills when interacting with children"/></div>
+    <div class="field"><label>Behavior 2 — Full Definition</label><textarea id="cfg-b2def" rows="3" style="font-size:13px;" placeholder="Full description of this behavior..."></textarea></div>
+    <div class="field"><label>Behavior 3 — Target (T)</label><input type="text" id="cfg-b3t" placeholder="e.g. Bruce will decrease aggressive behaviors"/></div>
+    <div class="field"><label>Behavior 3 — Replacement (R)</label><input type="text" id="cfg-b3r" placeholder="e.g. Bruce will increase problem solving solutions with the help of 2 prompts"/></div>
+    <div class="field"><label>Behavior 3 — Full Definition</label><textarea id="cfg-b3def" rows="3" style="font-size:13px;" placeholder="Full description of this behavior..."></textarea></div>
+  </div>
+
+  <button class="btn-save-settings" onclick="saveSettings()">&#x2713; Save Settings & Apply</button>
+  <div style="height:20px;"></div>
+</div>
+
+<!-- DATA SHEET -->
+<div class="view" id="view-datasheet">
+  <div class="ds-card">
+    <div class="card-title"><span class="dot"></span>Data Collection Sheet</div>
+    <div class="ds-header-row">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:140px;">
+        <span style="font-size:13px;font-weight:600;color:var(--ink2);">&#128197; Date:</span>
+        <span id="ds-date-display" style="font-size:15px;font-weight:700;color:var(--accent);">&#8212;</span>
+        <input type="hidden" id="ds-date"/>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Location</label>
+        <div class="check-group" style="margin-top:2px;">
+          <label class="check-pill" onclick="dsToglLoc(this)"><input type="checkbox" name="ds-loc" value="Home"/>Home</label>
+          <label class="check-pill" onclick="dsToglLoc(this)"><input type="checkbox" name="ds-loc" value="School"/>School</label>
+          <label class="check-pill" onclick="dsToglLoc(this)"><input type="checkbox" name="ds-loc" value="Community"/>Community</label>
+          <label class="check-pill" onclick="dsToglLoc(this)"><input type="checkbox" name="ds-loc" value="Camp"/>Camp</label>
+        </div>
+      </div>
+    </div>
+    <div class="ds-grid-wrap">
+      <table class="ds-grid" id="ds-table">
+        <thead>
+          <tr>
+            <th style="width:150px;">Target Behavior<br/>Replacement Behavior</th>
+            <th>8–9<br/>am</th><th>9–10<br/>am</th><th>10–11<br/>am</th><th>11–12<br/>noon</th>
+            <th>12–1<br/>pm</th><th>1–2<br/>pm</th><th>2–3<br/>pm</th><th>3–4<br/>pm</th>
+            <th>4–5<br/>pm</th><th>5–6<br/>pm</th><th>6–7<br/>pm</th><th>7–8<br/>pm</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="ds-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <button class="ds-print-btn" onclick="dsPrint()">&#128424; Print Data Sheet</button>
+  <button class="ds-new-btn" onclick="dsNew()">&#x21BA; Clear &amp; Reset Tallies for This Date</button>
+  <div class="ds-card">
+    <div class="card-title"><span class="dot"></span>Saved Data Sheets</div>
+    <div id="ds-saved-list" class="ds-saved-list"></div>
+  </div>
+</div>
+
+<!-- TIMESHEET -->
+<div class="view" id="view-timesheet">
+  <div class="ts-card">
+    <div class="card-title"><span class="dot"></span>Employee Time Slip — IBHS</div>
+    <div class="ts-week-nav">
+      <button onclick="tsNavWeek(-1)">&#8592; Prev Week</button>
+      <div class="ts-week-display" id="ts-week-display">Week of ...</div>
+      <button onclick="tsNavWeek(1)">Next Week &#8594;</button>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:13px;">
+      <div><span style="font-weight:600;color:var(--ink2);">Employee:</span> <span id="ts-emp-name" style="font-weight:700;"></span></div>
+      <div><span style="font-weight:600;color:var(--ink2);">Week ending (Sunday):</span> <span id="ts-week-end" style="font-weight:700;"></span></div>
+    </div>
+    <div class="ts-table-wrap">
+      <table class="ts-table" id="ts-table">
+        <thead>
+          <tr>
+            <th style="width:160px;text-align:left;padding-left:6px;">Client's Name</th>
+            <th style="width:45px;">Day</th>
+            <th style="width:70px;">Date</th>
+            <th style="width:70px;">Time Started</th>
+            <th style="width:70px;">Time Finished</th>
+            <th style="width:60px;">Service</th>
+            <th style="width:70px;">Authorized Hours</th>
+            <th style="width:60px;">Total Hours</th>
+            <th style="width:40px;">Hold</th>
+            <th style="width:40px;">Bill</th>
+          </tr>
+        </thead>
+        <tbody id="ts-tbody"></tbody>
+        <tfoot>
+          <tr style="background:#f5f5f5;">
+            <td colspan="5" style="border:1px solid #ccc;padding:5px 8px;font-size:11px;">
+              No of: &nbsp; <strong>BC Hours:</strong> _______ &nbsp; <strong>MT Hours:</strong> _______ &nbsp;
+              <strong>BHT Hours:</strong> <span id="ts-bht-hours" style="font-weight:700;color:var(--accent);min-width:30px;display:inline-block;">0</span> &nbsp;
+              <strong>Supervision Hours:</strong> <span id="ts-sup-hours" style="font-weight:700;color:var(--accent);">1</span>
+            </td>
+            <td colspan="5" style="border:1px solid #ccc;padding:5px 8px;font-size:11px;text-align:right;">
+              <button onclick="tsAutoFill()" style="padding:4px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--accent-light);color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;">&#x21BA; Auto-fill from records</button>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="ts-summary-row">
+      <div>BHT Hours: <span id="ts-bht-total">0</span></div>
+      <div>Supervision Hours: <span id="ts-sup-total">1</span></div>
+    </div>
+  </div>
+  <button class="ts-print-btn" onclick="tsPrint()">&#128424; Print Timesheet</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── EMBEDDED SIGNATURE ───────────────────────────────
+window._BHT_SIG="data:image/png;base64,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";
+// ── STORAGE ──────────────────────────────────────────────
+const DB_KEY = 'bht_db_v3';
+function getDB(){ try{ return JSON.parse(localStorage.getItem(DB_KEY)||'{}'); }catch(e){ return {}; } }
+function saveDB(db){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+// ── STATE ────────────────────────────────────────────────
+let entries = [], entryCounter = 0;
+let groupSessionTimes = {}; // key = "persons|||location", value = {startTime, endTime}
+let _skipBuildPrint = false; // flag to prevent buildPrint overwriting multi-date print
+
+// ── TIME HELPER ───────────────────────────────────────────
+function fmt12hr(t){
+  if(!t)return'';
+  const[h,m]=t.split(':').map(Number);
+  const ampm=h>=12?'pm':'am';
+  const hr=h%12||12;
+  return hr+':'+(m<10?'0':'')+m+' '+ampm;
+}
+let currentDate = '';
+let autoSaveTimer = null;
+let lastSavedTime = null;
+
+// ── INIT ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('main-date').value = today;
+  // Apply config defaults on load
+  const cfg = getConfigDefaults();
+  document.getElementById('startTime').value = cfg.startTime;
+  document.getElementById('endTime').value = cfg.endTime;
+  applyGoalsToSession(cfg.goals);
+  onDateChange();
+});
+
+// ── DATE CHANGE ───────────────────────────────────────────
+function onDateChange() {
+  const date = document.getElementById('main-date').value;
+  if (!date) return;
+  currentDate = date;
+
+  const db = getDB();
+  const record = db[date];
+
+  if (record) {
+    populateForm(record);
+    showDateStatus('existing', `✅ Record found for ${formatDate(date)} — loaded`);
+    lastSavedTime = record.savedAt;
+    updateSaveBarInfo(true);
+    showToast(`Loaded: ${formatDate(date)}`);
+  } else {
+    clearFormFields();
+    showDateStatus('new-entry', `📝 New record for ${formatDate(date)} — fill in and it auto-saves as you type`);
+    lastSavedTime = null;
+    updateSaveBarInfo(false);
+  }
+
+  // Show UI
+  document.getElementById('save-bar').classList.add('show');
+  document.getElementById('tab-bar').classList.add('show');
+  document.getElementById('no-date-msg').style.display = 'none';
+  document.getElementById('session-form').style.display = 'block';
+  renderEntries();
+  updateEntryBadge();
+  switchTab('session');
+}
+
+function showDateStatus(type, msg) {
+  const el = document.getElementById('date-status');
+  el.className = `date-status show ${type}`;
+  el.textContent = msg;
+}
+
+// ── AUTO-CALC HOURS ───────────────────────────────────────
+function calcHours() {
+  const st = document.getElementById('startTime').value;
+  const et = document.getElementById('endTime').value;
+  if (!st || !et) return;
+  const [sh, sm] = st.split(':').map(Number);
+  const [eh, em] = et.split(':').map(Number);
+  let mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins <= 0) mins += 24 * 60;
+  const hrs = mins / 60;
+  const display = Number.isInteger(hrs) ? hrs.toString() : hrs.toFixed(2);
+  const el = document.getElementById('totalHrs');
+  if (el) el.value = display;
+}
+
+// ── AUTO-SAVE ON EVERY KEYSTROKE ──────────────────────────
+function triggerAutoSave() {
+  if (!currentDate) return;
+  // Show saving indicator immediately
+  setPill('saving', 'Saving...');
+  clearTimeout(autoSaveTimer);
+  // Debounce — save 1.5s after last keystroke
+  autoSaveTimer = setTimeout(() => {
+    doSave(true); // true = silent auto-save
+  }, 1500);
+}
+
+// ── CORE SAVE FUNCTION ────────────────────────────────────
+function doSave(silent = false) {
+  if (!currentDate) return;
+  if (!gv('clientName') && !entries.length) {
+    if (!silent) showToast('⚠ Enter client name first');
+    setPill('new', 'Select a date');
+    return;
+  }
+
+  const record = captureForm();
+  const db = getDB();
+  const isUpdate = !!db[currentDate];
+  db[currentDate] = record;
+  saveDB(db);
+
+  lastSavedTime = record.savedAt;
+  updateSaveBarInfo(true);
+
+  const t = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  setPill('saved', `Saved ${t}`);
+
+  if (!silent) {
+    showToast(isUpdate ? 'Updated ✓' : 'Saved ✓');
+    showDateStatus('existing', `✅ Saved for ${formatDate(currentDate)}`);
+    const btn = document.getElementById('save-bar-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Saved!';
+    setTimeout(() => btn.innerHTML = orig, 2000);
+  }
+}
+
+function saveReport() {
+  doSave(false);
+}
+
+function updateSaveBarInfo(saved) {
+  const el = document.getElementById('save-bar-info');
+  if (saved && lastSavedTime) {
+    const t = new Date(lastSavedTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    el.textContent = `Last saved ${t}`;
+    el.style.color = 'var(--success)';
+  } else {
+    el.textContent = 'Not saved yet — auto-saves as you type';
+    el.style.color = 'var(--ink3)';
+  }
+}
+
+function updateTabTop(){
+  const header = document.querySelector('.header');
+  const datebar = document.querySelector('.date-bar');
+  const savebar = document.getElementById('save-bar');
+  const h = (header?.offsetHeight||57) + (datebar?.offsetHeight||50) + (savebar?.classList.contains('show') ? savebar.offsetHeight : 0);
+  document.documentElement.style.setProperty('--tab-top', h+'px');
+}
+function setPill(type, text) {
+  const el = document.getElementById('status-pill');
+  const dot = document.getElementById('pill-dot');
+  el.className = `autosave-pill pill-${type}`;
+  document.getElementById('pill-text').textContent = text;
+  dot.className = type === 'saving' ? 'pill-dot pulse' : 'pill-dot';
+}
+
+// ── CAPTURE / POPULATE ────────────────────────────────────
+function captureForm() {
+  return {
+    clientName: gv('clientName'),
+    serviceDate: currentDate,
+    startTime: gv('startTime'),
+    endTime: gv('endTime'),
+    totalHours: gv('totalHrs'),
+    sessionType: document.querySelector('input[name="sessionType"]:checked')?.value || 'in-person',
+    personsPresent: getChecked('persons').join(', '),
+    location: getChecked('location').join(', '),
+    goal1: gv('goal1'), goal2: gv('goal2'), goal3: gv('goal3'),
+    goals: (()=>{const g=[];let i=1;while(document.getElementById('goal'+i)){g.push(gv('goal'+i));i++;}return g;})(),
+    groupSessionTimes: {...groupSessionTimes},
+    entries: JSON.parse(JSON.stringify(entries)),
+    atRisk: document.querySelector('input[name="risk"]:checked')?.value || 'No',
+    howManaged: gv('mgmt'),
+    transferOfSkills: gv('transfer'),
+    nextServiceDate: gv('nextDate'),
+    nextPlan: gv('nextPlan'),
+    staffName: gv('staffName'),
+    audioPh: gv('audioPh'),
+    audioReason: gv('audioReason'),
+    savedAt: new Date().toISOString()
+  };
+}
+
+function populateForm(r) {
+  setValue('clientName', r.clientName);
+  setValue('startTime', r.startTime);
+  setValue('endTime', r.endTime);
+  setValue('totalHrs', r.totalHours);
+  // Restore goals dynamically
+  if(r.goals && r.goals.length){
+    applyGoalsToSession(r.goals);
+    r.goals.forEach((g,i)=>setValue('goal'+(i+1),g));
+  } else {
+    setValue('goal1', r.goal1); setValue('goal2', r.goal2); setValue('goal3', r.goal3);
+  }
+  setValue('mgmt', r.howManaged); setValue('transfer', r.transferOfSkills);
+  setValue('nextPlan', r.nextPlan); setValue('nextDate', r.nextServiceDate);
+  setValue('staffName', r.staffName);
+  groupSessionTimes = r.groupSessionTimes ? {...r.groupSessionTimes} : {};
+  setValue('audioPh', r.audioPh); setValue('audioReason', r.audioReason);
+  if (r.sessionType) {
+    document.querySelectorAll('input[name="sessionType"]').forEach(i => {
+      const p = i.closest('.check-pill');
+      if (i.value===r.sessionType){i.checked=true;p.classList.add('checked');}
+      else{i.checked=false;p.classList.remove('checked');}
+    });
+    document.getElementById('audio-ph').style.display = r.sessionType==='audio'?'block':'none';
+  }
+  if (r.personsPresent) restoreGroup('persons', r.personsPresent.split(', ').filter(Boolean));
+  if (r.location) restoreGroup('location', r.location.split(', ').filter(Boolean));
+  if (r.atRisk) setRisk(r.atRisk);
+  entries = r.entries ? JSON.parse(JSON.stringify(r.entries)) : [];
+  entryCounter = entries.reduce((m,e)=>Math.max(m,e.id),0);
+}
+
+function clearFormFields() {
+  const cfg = getConfigDefaults();
+  setValue('clientName', cfg.clientName);
+  setValue('startTime', cfg.startTime);
+  setValue('endTime', cfg.endTime);
+  setValue('totalHrs', cfg.totalHours);
+  setValue('staffName', cfg.staffName);
+  groupSessionTimes = {};
+  // Summary defaults from config
+  setValue('mgmt', cfg.mgmt);
+  setValue('transfer', cfg.transfer);
+  setValue('nextPlan', cfg.nextPlan);
+  setValue('audioPh',''); setValue('audioReason','');
+  // Auto-fill next working day from current report date
+  setValue('nextDate', getNextWorkingDay(currentDate));
+  // Apply dynamic goals from config
+  applyGoalsToSession(cfg.goals);
+  restoreGroup('persons', cfg.personsPresent ? cfg.personsPresent.split(',').map(s=>s.trim()) : ['Teacher']);
+  restoreGroup('location', cfg.location ? cfg.location.split(',').map(s=>s.trim()) : ['School']);
+  document.querySelectorAll('input[name="sessionType"]').forEach(i=>{
+    const p=i.closest('.check-pill');
+    if(i.value===cfg.sessionType){i.checked=true;p.classList.add('checked');}
+    else{i.checked=false;p.classList.remove('checked');}
+  });
+  document.getElementById('audio-ph').style.display='none';
+  setRisk('No');
+  entries=[]; entryCounter=0;
+  setPill('new','New record');
+}
+
+function setValue(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
+function restoreGroup(name,values){
+  document.querySelectorAll(`input[name="${name}"]`).forEach(i=>{
+    const p=i.closest('.check-pill');
+    if(values.includes(i.value)){i.checked=true;p.classList.add('checked');}
+    else{i.checked=false;p.classList.remove('checked');}
+  });
+}
+
+// ── ALL RECORDS ───────────────────────────────────────────
+function loadAllRecords() {
+  const db=getDB();
+  const el=document.getElementById('all-records-list');
+  const keys=Object.keys(db).sort((a,b)=>new Date(b)-new Date(a));
+  if(!keys.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div>No reports saved yet.<br/>Select a date and start filling in the session — it auto-saves as you type.</div>';
+    return;
+  }
+  const header=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" id="chk-all-dates" onchange="toggleAllDates(this)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);"/>
+      <label for="chk-all-dates" style="font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;">Select All</label>
+    </div>
+    <div id="btn-print-selected" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button onclick="printSelectedDates()" style="padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">&#128424; Print Selected</button>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);cursor:pointer;">
+        <input type="checkbox" id="chk-include-timesheet" style="width:15px;height:15px;accent-color:var(--accent);"/>
+        Include Timesheet
+      </label>
+    </div>
+  </div>`;
+  const rows=keys.map(date=>{
+    const r=db[date];
+    const t=r.savedAt?new Date(r.savedAt).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'';
+    return`<div class="report-row" style="display:flex;align-items:center;gap:12px;">
+      <input type="checkbox" class="date-chk" data-date="${date}" onchange="onDateCheckChange()" style="width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--accent);"/>
+      <div style="flex:1;min-width:0;">
+        <div class="report-client">${r.clientName||'Unknown'}</div>
+        <div class="report-meta">${formatDate(date)} · ${r.startTime||''} – ${r.endTime||''} · ${(r.entries||[]).length} entries · Saved ${t}</div>
+      </div>
+      <div class="report-btns" style="flex-shrink:0;">
+        <button class="btn-sm btn-accent" onclick="jumpToDate('${date}')">Load</button>
+        <button class="btn-sm btn-danger" onclick="deleteRecord('${date}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML=header+rows;
+}
+
+function toggleAllDates(cb){
+  document.querySelectorAll('.date-chk').forEach(c=>c.checked=cb.checked);
+  onDateCheckChange();
+}
+
+function onDateCheckChange(){
+  const all=document.querySelectorAll('.date-chk');
+  const checked=document.querySelectorAll('.date-chk:checked');
+  const btn=document.getElementById('btn-print-selected');
+  if(btn)btn.style.display=checked.length>0?'block':'none';
+  const cb=document.getElementById('chk-all-dates');
+  if(cb){cb.indeterminate=checked.length>0&&checked.length<all.length;cb.checked=checked.length===all.length&&all.length>0;}
+}
+
+function jumpToDate(date){
+  document.getElementById('main-date').value=date;
+  onDateChange();
+}
+
+function deleteRecord(date){
+  if(!confirm(`Delete report for ${formatDate(date)}? Cannot be undone.`))return;
+  const db=getDB();delete db[date];saveDB(db);
+  loadAllRecords();showToast('Deleted');
+}
+
+function exportCSV(){
+  const db=getDB();const keys=Object.keys(db).sort();
+  if(!keys.length){showToast('No reports to export');return;}
+  const headers=['Service Date','Client','Start','End','Hours','Session Type','Persons','Location','Goal 1','Goal 2','Goal 3','Entries','At Risk','How Managed','Transfer of Skills','Next Date','Next Plan','Staff'];
+  const rows=keys.map(date=>{
+    const r=db[date];
+    return[date,r.clientName,r.startTime,r.endTime,r.totalHours,r.sessionType,r.personsPresent,r.location,r.goal1,r.goal2,r.goal3,(r.entries||[]).length,r.atRisk,r.howManaged,r.transferOfSkills,r.nextServiceDate,r.nextPlan,r.staffName];
+  });
+  const csv=[headers,...rows].map(row=>row.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`BHT_Reports_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();showToast('Exported ✓ — opens in Excel');
+}
+
+// ── TABS ─────────────────────────────────────────────────
+// switchTab moved to Data Sheet section
+
+// ── UI ────────────────────────────────────────────────────
+function toggleCheck(el){el.classList.toggle('checked');el.querySelector('input').checked=!el.querySelector('input').checked;triggerAutoSave();}
+function togglePill(el,name,val){
+  document.querySelectorAll(`input[name="${name}"]`).forEach(i=>i.closest('.check-pill').classList.remove('checked'));
+  el.classList.add('checked');el.querySelector('input').checked=true;
+  if(name==='sessionType')document.getElementById('audio-ph').style.display=val==='audio'?'block':'none';
+  triggerAutoSave();
+}
+function setRisk(val){['No','Yes'].forEach(v=>{const el=document.getElementById('risk-'+v.toLowerCase());el.classList.toggle('checked',v===val);el.querySelector('input').checked=v===val;});}
+function gv(id){return(document.getElementById(id)||{}).value||'';}
+function getChecked(name){return[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value);}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function formatDate(d){if(!d)return'—';return new Date(d+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function updateEntryBadge(){
+  const n=entries.length;
+  const b=document.getElementById('entry-badge');
+  if(b){b.textContent=n;b.style.display=n?'inline':'none';}
+  const l=document.getElementById('entry-count-label');
+  if(l)l.textContent=n+' entr'+(n===1?'y':'ies');
+
+}
+
+function addEntry(){
+  entryCounter++;const id=entryCounter;
+  const _dp=getChecked('persons'), _dl=getChecked('location');
+  entries.push({id,time:new Date().toTimeString().slice(0,5),antecedent:'',behavior:'',caregiverIntv:'',bhtIntv:'',response:'',goals:[],collapsed:false,entryPersons:[..._dp],entryLocation:[..._dl]});
+  renderEntries();updateEntryBadge();triggerAutoSave();
+  setTimeout(()=>document.getElementById('entry-'+id)?.scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+}
+function deleteEntry(id){entries=entries.filter(e=>e.id!==id);renderEntries();updateEntryBadge();triggerAutoSave();showToast('Entry removed');}
+function toggleCollapse(id){const e=entries.find(x=>x.id===id);if(e){e.collapsed=!e.collapsed;renderEntries();}}
+function saveField(id,field,val){const e=entries.find(x=>x.id===id);if(e){e[field]=val;triggerAutoSave();}}
+function toggleEntryLoc(id,field,val,el){
+  const e=entries.find(x=>x.id===id);
+  if(!e)return;
+  if(!e[field])e[field]=[...getChecked(field==='entryPersons'?'persons':'location')];
+  const idx=e[field].indexOf(val);
+  if(idx===-1)e[field].push(val); else e[field].splice(idx,1);
+  el.classList.toggle('on');
+  el.innerHTML=(e[field].includes(val)?'&#10003; ':'')+val;
+  triggerAutoSave();
+}
+
+function _makeGroupKey(e){
+  const sp=getChecked('persons'), sl=getChecked('location');
+  const p=[...(e.entryPersons&&e.entryPersons.length?e.entryPersons:sp)].sort().join(',');
+  const l=[...(e.entryLocation&&e.entryLocation.length?e.entryLocation:sl)].sort().join(',');
+  return p+'|||'+l;
+}
+
+let _pendingGrpKey = null;
+// checkNewGroupTime removed — now using inline panel
+
+function saveGrpTime(){
+  const st=document.getElementById('grptime-start').value;
+  const et=document.getElementById('grptime-end').value;
+  if(!st||!et){showToast('Please enter both start and end time');return;}
+  if(_pendingGrpKey){
+    groupSessionTimes[_pendingGrpKey]={startTime:st,endTime:et};
+    triggerAutoSave();
+    showToast('Session time saved ✓');
+  }
+  closeGrpTimeModal();
+}
+
+function closeGrpTimeModal(){
+  document.getElementById('grptime-modal').classList.remove('open');
+  document.body.style.overflow='';
+  _pendingGrpKey=null;
+}
+function toggleGoal(id,n){const e=entries.find(x=>x.id===id);if(!e)return;const idx=e.goals.indexOf(n);if(idx===-1)e.goals.push(n);else e.goals.splice(idx,1);renderEntries();triggerAutoSave();}
+
+function renderEntries(){
+  // Collect all goals dynamically
+  const goals=(()=>{const g=[];let i=1;while(document.getElementById('goal'+i)){const v=gv('goal'+i);if(v)g.push(v);i++;}return g;})();
+  const con=document.getElementById('entries-container');if(!con)return;
+  if(!entries.length){con.innerHTML='<div class="empty-state"><div class="empty-icon">📝</div>No behavior entries yet.<br/>Tap the button below to add one.</div>';return;}
+  con.innerHTML=entries.map((e,idx)=>{
+    const preview=e.behavior?e.behavior.substring(0,65)+(e.behavior.length>65?'…':''):'No behavior noted yet';
+    const tags=e.goals.map(g=>`<span class="goal-tag goal-${g}">G${g}</span>`).join('');
+    return`<div class="entry-card" id="entry-${e.id}">
+      <div class="entry-header" onclick="toggleCollapse(${e.id})">
+        <div class="entry-num">Entry ${idx+1} <span class="entry-time">${fmt12hr(e.time)}</span>${tags}</div>
+        <div style="display:flex;align-items:center;gap:8px;"><button class="entry-delete" onclick="event.stopPropagation();deleteEntry(${e.id})">×</button><span style="font-size:12px;color:var(--ink3)">${e.collapsed?'▼':'▲'}</span></div>
+      </div>
+      ${e.collapsed?`<div class="entry-preview">${preview}</div>`:`
+      <div class="entry-body">
+        <div class="field-row">
+          <div><label>Time</label><input type="time" value="${e.time}" onchange="saveField(${e.id},'time',this.value)"/></div>
+          <div><label>Goals</label><div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+            ${goals.map((g,i)=>g?`<label class="check-pill ${e.goals.includes(i+1)?'checked':''}" onclick="toggleGoal(${e.id},${i+1})"><input type="checkbox" style="display:none"/>G${i+1}</label>`:'').join('')}
+          </div></div>
+        </div>
+        <div class="field"><label>Antecedent (what happened before)</label><textarea rows="2" placeholder="Describe the situation before the behavior..." onchange="saveField(${e.id},'antecedent',this.value)">${e.antecedent}</textarea></div>
+        <div class="field"><label>Behavior (child's response)</label><textarea rows="2" placeholder="Describe what the child did..." onchange="saveField(${e.id},'behavior',this.value)">${e.behavior}</textarea></div>
+        <div class="field"><label>Caregiver / educator intervention</label><textarea rows="2" placeholder="What did the teacher or caregiver do?" onchange="saveField(${e.id},'caregiverIntv',this.value)">${e.caregiverIntv}</textarea></div>
+        <div class="field"><label>BHT / TSS intervention</label><textarea rows="2" placeholder="What did you (BHT) do?" onchange="saveField(${e.id},'bhtIntv',this.value)">${e.bhtIntv}</textarea></div>
+        <div class="field"><label>Client's response</label><textarea rows="2" placeholder="How did the client respond?" onchange="saveField(${e.id},'response',this.value)">${e.response}</textarea></div>
+        <div class="entry-section-label">Persons present for this incident</div>
+        <div class="entry-loc-row">${(()=>{const p=e.entryPersons&&e.entryPersons.length?e.entryPersons:getChecked('persons');return ['Parent','Teacher','BC','Other'].map(v=>`<span class="eloc-pill${p.includes(v)?' on':''}" onclick="toggleEntryLoc(${e.id},'entryPersons','${v}',this)">${p.includes(v)?'&#10003; ':''}${v}</span>`).join('');})()}</div>
+        <div class="entry-section-label">Location for this incident</div>
+        <div class="entry-loc-row">${(()=>{const l=e.entryLocation&&e.entryLocation.length?e.entryLocation:getChecked('location');return ['Home','School','Community','Camp'].map(v=>`<span class="eloc-pill${l.includes(v)?' on':''}" onclick="toggleEntryLoc(${e.id},'entryLocation','${v}',this)">${l.includes(v)?'&#10003; ':''}${v}</span>`).join('');})()}</div>
+      </div>`}
+    </div>`;
+  }).join('');
+}
+
+function refreshSummary(){
+  document.getElementById('ov-date').textContent=formatDate(currentDate);
+  document.getElementById('ov-client').textContent=gv('clientName')||'—';
+  const st=gv('startTime'),et=gv('endTime');
+  document.getElementById('ov-time').textContent=(st&&et)?`${st} – ${et}`:'—';
+  document.getElementById('ov-entries').textContent=entries.length;
+  const rv=document.querySelector('input[name="risk"]:checked')?.value||'No';
+  document.getElementById('ov-risk').innerHTML=`<span class="badge ${rv==='Yes'?'badge-warn':'badge-ok'}">${rv}</span>`;
+}
+
+function fmt(id){return gv(id)||'';}
+function fmtDate2(id){const v=gv(id);if(!v)return'';return new Date(v+'T12:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});}
+function fmtDate2List(d){if(!d)return'';return new Date(d+'T12:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});}
+
+function buildPrint(){
+  // Collect all goals dynamically
+  const goals=(()=>{const g=[];let i=1;while(document.getElementById('goal'+i)){const v=gv('goal'+i);if(v)g.push(v);i++;}return g;})();
+  const stVal=document.querySelector('input[name="sessionType"]:checked')?.value||'in-person';
+  const riskVal=document.querySelector('input[name="risk"]:checked')?.value||'No';
+  const chk=(val,match)=>val===match?'&#9745;':'&#9744;';
+
+  // Persons present checkboxes
+  const checkedPersons=getChecked('persons');
+  const allPersons=['Parent','Teacher','BC','Other'];
+  const personsHtml=allPersons.map(p=>`${chk(checkedPersons.includes(p)?p:'__',p)} ${p}`).join(' &nbsp; ');
+
+  // Location checkboxes
+  const checkedLocs=getChecked('location');
+  const allLocs=['Home','School','Community','Camp'];
+  const locsHtml=allLocs.map(l=>`${chk(checkedLocs.includes(l)?l:'__',l)} ${l}`).join(' &nbsp; ');
+
+  const goalsText=goals.filter(Boolean).map((g,i)=>`${i+1}. ${g}`).join(' &nbsp; ');
+  const audioPh=gv('audioPh'), audioReason=gv('audioReason');
+
+  // Date format M/DD/YYYY
+  function fmtDateShort(d){
+    if(!d)return'';
+    const dt=new Date(d+'T12:00');
+    const m=dt.getMonth()+1;
+    const dd=String(dt.getDate()).padStart(2,'0');
+    const yyyy=dt.getFullYear();
+    return `${m}/${dd}/${yyyy}`;
+  }
+
+  // Total hours display: integer stays integer, decimal becomes "X hours Y minutes"
+  function fmtHours(val){
+    const n=parseFloat(val);
+    if(isNaN(n)) return val||'';
+    const totalMins=Math.round(n*60);
+    const hrs=Math.floor(totalMins/60);
+    const mins=totalMins%60;
+    if(mins===0) return String(hrs);
+    return `${hrs} hours ${mins} minutes`;
+  }
+
+  // Filter blank entries
+  const printEntries=entries.filter(e=>(e.antecedent||'').trim()||(e.behavior||'').trim()||(e.caregiverIntv||'').trim()||(e.bhtIntv||'').trim()||(e.response||'').trim());
+
+  // Group by unique Persons + Location per entry
+  const _sessPersons=getChecked('persons');
+  const _sessLocs=getChecked('location');
+  function _getKey(e){
+    const p=[...(e.entryPersons&&e.entryPersons.length?e.entryPersons:_sessPersons)].sort().join(',');
+    const l=[...(e.entryLocation&&e.entryLocation.length?e.entryLocation:_sessLocs)].sort().join(',');
+    return p+'|||'+l;
+  }
+  const _groupOrder=[], _groupMap={};
+  printEntries.forEach(e=>{
+    const k=_getKey(e);
+    if(!_groupMap[k]){_groupMap[k]=[];_groupOrder.push(k);}
+    _groupMap[k].push(e);
+  });
+  if(_groupOrder.length===0) _groupOrder.push('|||');
+
+  const _reportGroups=_groupOrder.map(k=>{
+    const parts=k.split('|||');
+    const pArr=parts[0]?parts[0].split(','):_sessPersons;
+    const lArr=parts[1]?parts[1].split(','):_sessLocs;
+    const grpE=_groupMap[k]||[];
+    const grpPages=[];
+    if(grpE.length===0){grpPages.push([]);}
+    else{for(let i=0;i<grpE.length;i+=4)grpPages.push(grpE.slice(i,i+4));}
+    return{pArr,lArr,grpPages};
+  });
+
+  const thead=`<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:6px;">
+    <thead><tr style="background:#f0f0f0;">
+      <th style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:10.5px;width:23%;">Antecedent<br/><span style="font-weight:400;font-size:10px;">(What occurred before the behavior)</span></th>
+      <th style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:10.5px;width:23%;">Describe Behavior<br/><span style="font-weight:400;font-size:10px;">(Child's response to antecedent)</span></th>
+      <th style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:10.5px;width:30%;">Interventions Used by<br/><span style="font-weight:400;font-size:10px;">1 Caregiver/Educator &nbsp; 2. TSS</span></th>
+      <th style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:10.5px;width:24%;">Client's Response<br/><span style="font-weight:400;font-size:10px;">to the intervention(s)</span></th>
+    </tr></thead><tbody>`;
+
+  let html='';
+  _reportGroups.forEach((grp, grpIdx)=>{
+    const grpPersonsHtml=allPersons.map(p=>`${chk(grp.pArr.includes(p)?p:'__',p)} ${p}`).join(' &nbsp; ');
+    const grpLocsHtml=allLocs.map(l=>`${chk(grp.lArr.includes(l)?l:'__',l)} ${l}`).join(' &nbsp; ');
+    const grpTotalPages=grp.grpPages.length;
+
+    function makeGrpClientBlock(){
+      // Use group-specific times if available, else fall back to main session
+      const grpKey=grp.pArr.slice().sort().join(',')+'|||'+grp.lArr.slice().sort().join(',');
+      const sessKey=checkedPersons.slice().sort().join(',')+'|||'+checkedLocs.slice().sort().join(',');
+      const grpTimes=groupSessionTimes[grpKey]||null;
+      const isMainSess=(grpKey===sessKey);
+      const st=grpTimes?grpTimes.startTime:(fmt('startTime')||'');
+      const et=grpTimes?grpTimes.endTime:(fmt('endTime')||'');
+      // Calculate total hrs for this group
+      let grpHrsDisplay=gv('totalHrs');
+      if(grpTimes){
+        const[sh,sm]=st.split(':').map(Number);
+        const[eh,em]=et.split(':').map(Number);
+        let mins=(eh*60+em)-(sh*60+sm);
+        if(mins<=0)mins+=24*60;
+        const hrs=mins/60;
+        grpHrsDisplay=Number.isInteger(hrs)?hrs.toString():Math.floor(hrs)+' hours '+(mins%60)+' minutes';
+      } else {
+        grpHrsDisplay=fmtHours(gv('totalHrs'));
+      }
+      return `<table style="width:100%;border:none;border-collapse:collapse;font-size:12px;margin-bottom:5px;">
+        <tr>
+          <td style="border:none;padding:2px 4px 2px 0;">Client Name: <u><strong>${fmt('clientName')}</strong></u></td>
+          <td style="border:none;padding:2px 4px;">Service Date: ${fmtDateShort(currentDate)}</td>
+          <td style="border:none;padding:2px 4px;">Start: <strong>${fmt12hr(st)}</strong></td>
+          <td style="border:none;padding:2px 4px;">End: <strong>${fmt12hr(et)}</strong></td>
+          <td style="border:none;padding:2px 0;">Total Hrs: <strong>${grpHrsDisplay}</strong></td>
+        </tr>
+        <tr>
+          <td colspan="2" style="border:none;padding:2px 0;">Persons Present: &nbsp; ${grpPersonsHtml}</td>
+          <td colspan="3" style="border:none;padding:2px 0;">Location: &nbsp; ${grpLocsHtml}</td>
+        </tr>
+        <tr>
+          <td colspan="5" style="border:none;padding:2px 0;">Goals worked on: ${goalsText}</td>
+        </tr>
+      </table>`;
+    }
+
+    function makeGrpFullHeader(){
+      return `<div style="text-align:center;margin-bottom:6px;">
+          <div style="font-size:18px;font-weight:700;">OMNI HEALTH SERVICES</div>
+          <div style="font-size:15px;font-weight:700;">BHT Daily Report</div>
+        </div>
+        <table style="width:100%;border:none;border-collapse:collapse;font-size:13px;margin-bottom:2px;">
+          <tr>
+            <td style="border:none;padding:2px 0;width:55%;vertical-align:top;">
+              <div>${chk(stVal,'in-person')} In person session</div>
+              <div style="margin-top:3px;">${chk(stVal,'telehealth')} Telehealth only &ndash; Verbal Consent obtained &nbsp;&nbsp;&nbsp; ${chk(stVal,'audio')} Audio / Video</div>
+              <div style="margin-top:3px;padding-left:20px;">${chk(stVal,'audio')} Audio Only &ndash; Ph number: ${audioPh||''}</div>
+            </td>
+            <td style="border:none;padding:2px 0;vertical-align:top;text-align:right;">
+              <strong>Reason for Audio Only:</strong> ${audioReason||''}
+            </td>
+          </tr>
+        </table>
+        ${makeGrpClientBlock()}`;
+    }
+
+    if(grpIdx>0){
+      html+=`<div style="margin:16px 0 8px;padding:8px 12px;background:#f0f0f0;border-radius:6px;font-size:11px;font-weight:600;color:#666;" class="no-print">&#8212; Report ${grpIdx+1}: ${grp.lArr.join(', ')} &nbsp;|&nbsp; ${grp.pArr.join(', ')} &#8212;</div>`;
+    }
+
+    grp.grpPages.forEach((pe,pi)=>{
+      const header=pi===0?makeGrpFullHeader():`${makeGrpClientBlock()}`;
+      html+=`<div class="print-page">${header}${thead}`;
+      pe.forEach(e=>{
+        const td='border:1px solid #999;padding:6px 7px;vertical-align:top;';
+        const c1=(e.caregiverIntv||'').trim();
+        const c2=(e.bhtIntv||'').trim();
+        let intv=c1?'1. '+c1:'1.';
+        if(c2) intv+='<br/>2. '+c2;
+        html+=`<tr>
+          <td style="${td}">${e.antecedent||''}</td>
+          <td style="${td}">${e.behavior||''}</td>
+          <td style="${td}">${intv}</td>
+          <td style="${td}">${e.response||''}</td>
+        </tr>`;
+      });
+      html+='</tbody></table>';
+      if(pi===grpTotalPages-1){
+      const fullLine='flex:1;border-bottom:2px solid #000;margin-left:8px;';
+      // Compute per-group next service date
+      const _grpKey=grp.pArr.slice().sort().join(',')+'|||'+grp.lArr.slice().sort().join(',');
+      const _grpTimes=groupSessionTimes[_grpKey]||null;
+      const _sessKey=_sessPersons.slice().sort().join(',')+'|||'+_sessLocs.slice().sort().join(',');
+      const _grpNextDate=_grpTimes&&_grpTimes.nextServiceDate?_grpTimes.nextServiceDate:(_grpKey===_sessKey?gv('nextDate'):'');
+      html+=`<div style="font-size:12px;margin-top:4px;">
+        <div style="display:flex;align-items:flex-end;padding:6px 0;">
+          <span style="white-space:nowrap;"><strong>At Risk Behavior:</strong> &nbsp; ${chk(riskVal,'No')} No &nbsp;&nbsp; ${chk(riskVal,'Yes')} Yes</span>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding:6px 0;">
+          <span style="white-space:nowrap;"><strong>How Behavior Was Managed:</strong></span>
+          <span style="${fullLine}">${gv('mgmt')}</span>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding:6px 0;">
+          <span style="white-space:nowrap;"><strong>Transfer of Skills:</strong></span>
+          <span style="${fullLine}">${gv('transfer')}</span>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding:6px 0;">
+          <span style="white-space:nowrap;"><strong>Next Service Date with Plan:</strong></span>
+          <span style="${fullLine}">${_grpNextDate?fmtDate2List(_grpNextDate):''}${gv('nextPlan')?' &nbsp; '+gv('nextPlan'):''}</span>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding:6px 0;">
+          <span style="white-space:nowrap;"><strong>*Staff Signature(with title and credentials):</strong></span>
+          <span style="flex:1;margin-left:8px;border-bottom:2px solid #000;display:flex;flex-direction:row;align-items:flex-end;">
+            <img src="${getPrintSignatureSrc()||'data:image/png;base64,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'}" style="height:38px;width:auto;object-fit:contain;display:block;margin-bottom:2px;filter:contrast(1.2);" alt="Signature"/> &nbsp;<span style="font-size:11px;font-weight:600;color:#333;">(BHT)</span>
+          </span>
+          <span style="white-space:nowrap;margin-left:20px;"><strong>Staff Name(print):</strong></span>
+          <span style="flex:1;border-bottom:2px solid #000;margin-left:8px;padding-bottom:2px;">${gv('staffName')||'Yasoda Vegi'}</span>
+        </div>
+      </div>
+      <div style="margin-top:6px;font-size:12px;font-style:italic;color:#333;">*My signature verifies that the information on this form is accurate. Submission of any false claims or statements is a Federal offense and punishable by law.</div>`;
+      }
+      html+='</div>';
+    });
+  });
+  document.getElementById('print-area').innerHTML=html;
+}
+// ── PAST BEHAVIORS MODAL ─────────────────────────────────
+let pbhSelected = new Set();
+
+function openPastBehaviorsModal() {
+  pbhSelected = new Set();
+  const db = getDB();
+  const dates = Object.keys(db).sort((a,b)=>new Date(b)-new Date(a)).filter(d=>d!==currentDate);
+  const sel = document.getElementById('pbh-filter');
+  sel.innerHTML = '<option value="">All dates</option>' + dates.map(d=>`<option value="${d}">${formatDate(d)}</option>`).join('');
+  document.getElementById('pbh-search').value = '';
+  renderPastBehaviors();
+  document.getElementById('past-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePastModal() {
+  document.getElementById('past-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('past-modal')) closePastModal();
+}
+
+function renderPastBehaviors() {
+  const db = getDB();
+  const search = document.getElementById('pbh-search').value.toLowerCase().trim();
+  const filterDate = document.getElementById('pbh-filter').value;
+  const body = document.getElementById('pbh-body');
+  const grouped = {};
+  const dates = Object.keys(db).sort((a,b)=>new Date(b)-new Date(a)).filter(d=>d!==currentDate);
+
+  dates.forEach(date => {
+    if (filterDate && date !== filterDate) return;
+    const rec = db[date];
+    if (!rec.entries || !rec.entries.length) return;
+    rec.entries.forEach((e, idx) => {
+      if (!e.behavior && !e.antecedent) return;
+      const hay = [e.behavior,e.antecedent,e.bhtIntv,e.caregiverIntv,e.response].join(' ').toLowerCase();
+      if (search && !hay.includes(search)) return;
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push({...e, _date:date, _idx:idx, _key:`${date}||${idx}`});
+    });
+  });
+
+  const groupDates = Object.keys(grouped);
+  if (!groupDates.length) {
+    body.innerHTML = `<div class="pbh-empty"><div style="font-size:36px;margin-bottom:10px">&#x1F4ED;</div>${search?'No behaviors match your search.':'No past behavior entries found in other dates.'}</div>`;
+    return;
+  }
+
+  body.innerHTML = groupDates.map(date => {
+    const cards = grouped[date].map(e => {
+      const isSel = pbhSelected.has(e._key);
+      const beh = e.behavior ? (e.behavior.length>90?e.behavior.slice(0,90)+'...':e.behavior) : '<em style="opacity:.45">No behavior noted</em>';
+      const ant = e.antecedent ? (e.antecedent.length>55?e.antecedent.slice(0,55)+'...':e.antecedent) : '';
+      const res = e.response ? (e.response.length>55?e.response.slice(0,55)+'...':e.response) : '';
+      return `<div class="pbh-card${isSel?' selected':''}" onclick="togglePbhCard(this,'${e._key}')">
+        <div class="pbh-check">${isSel?'&#10003;':''}</div>
+        <div class="pbh-behavior">${beh}</div>
+        <div class="pbh-meta">
+          <span class="pbh-tag">&#9200; ${e.time||'--:--'}</span>
+          ${ant?`<span class="pbh-tag ant">A: ${ant}</span>`:''}
+          ${res?`<span class="pbh-tag res">R: ${res}</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="pbh-date-group"><div class="pbh-date-label">&#x1F4C5; ${formatDate(date)}</div><div class="pbh-grid">${cards}</div></div>`;
+  }).join('');
+
+  updatePbhSelInfo();
+}
+
+function togglePbhCard(el, key) {
+  if (pbhSelected.has(key)) {
+    pbhSelected.delete(key);
+    el.classList.remove('selected');
+    el.querySelector('.pbh-check').innerHTML = '';
+  } else {
+    pbhSelected.add(key);
+    el.classList.add('selected');
+    el.querySelector('.pbh-check').innerHTML = '&#10003;';
+  }
+  updatePbhSelInfo();
+}
+
+function updatePbhSelInfo() {
+  const n = pbhSelected.size;
+  const info = document.getElementById('pbh-sel-info');
+  const btn = document.getElementById('pbh-import-btn');
+  if (n > 0) {
+    info.style.display = 'inline';
+    info.textContent = n + ' selected';
+    btn.disabled = false;
+    btn.textContent = 'Copy ' + n + ' Behavior' + (n>1?'s':'');
+  } else {
+    info.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Copy Selected';
+  }
+}
+
+function importSelectedBehaviors() {
+  if (!pbhSelected.size) return;
+  const db = getDB();
+  let count = 0;
+  pbhSelected.forEach(key => {
+    const parts = key.split('||');
+    const date = parts[0], idx = parseInt(parts[1]);
+    const rec = db[date];
+    if (!rec || !rec.entries) return;
+    const src = rec.entries[idx];
+    if (!src) return;
+    entryCounter++;
+    entries.push({
+      id: entryCounter,
+      time: new Date().toTimeString().slice(0,5),
+      antecedent: src.antecedent||'',
+      behavior: src.behavior||'',
+      caregiverIntv: src.caregiverIntv||'',
+      bhtIntv: src.bhtIntv||'',
+      response: src.response||'',
+      goals: src.goals ? [...src.goals] : [],
+      collapsed: false
+    });
+    count++;
+  });
+  renderEntries();
+  updateEntryBadge();
+  triggerAutoSave();
+  closePastModal();
+  showToast(count + ' behavior' + (count>1?'s':'') + ' copied');
+  setTimeout(()=>document.getElementById('entries-container')?.scrollIntoView({behavior:'smooth',block:'start'}),200);
+}
+// ── EXPORT TO LOCAL EXCEL ─────────────────────────────────
+let pendingExcelFile = null;
+
+function openExportModal() {
+  const db = getDB();
+  if (!Object.keys(db).length) { showToast('No data to export'); return; }
+  pendingExcelFile = null;
+  document.getElementById('export-drop-label').innerHTML = '&#x1F4C2; <span>Click to upload</span> existing BHT_Reports.xlsx';
+  document.getElementById('export-drop-zone').classList.remove('has-file');
+  document.getElementById('btn-export-merge').disabled = true;
+  document.getElementById('excel-file-input').value = '';
+  document.getElementById('export-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeExportModal() {
+  document.getElementById('export-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  pendingExcelFile = null;
+}
+
+function onExcelFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  pendingExcelFile = file;
+  document.getElementById('export-drop-label').innerHTML = '&#x2705; <span>' + file.name + '</span> ready to merge';
+  document.getElementById('export-drop-zone').classList.add('has-file');
+  document.getElementById('btn-export-merge').disabled = false;
+}
+
+// Flatten DB into rows — one row per incident
+function dbToRows(db) {
+  const rows = [];
+  Object.keys(db).sort().forEach(date => {
+    const r = db[date];
+    const baseFields = {
+      'Service Date': date,
+      'Client Name': r.clientName || '',
+      'Start Time': r.startTime || '',
+      'End Time': r.endTime || '',
+      'Total Hours': r.totalHours || '',
+      'Session Type': r.sessionType || '',
+      'Persons Present': r.personsPresent || '',
+      'Location': r.location || '',
+      'Goal 1': r.goal1 || '',
+      'Goal 2': r.goal2 || '',
+      'Goal 3': r.goal3 || '',
+      'At Risk': r.atRisk || '',
+      'How Managed': r.howManaged || '',
+      'Transfer of Skills': r.transferOfSkills || '',
+      'Next Service Date': r.nextServiceDate || '',
+      'Next Plan': r.nextPlan || '',
+      'Staff Name': r.staffName || ''
+    };
+    const incidents = (r.entries || []).filter(e =>
+      (e.antecedent||'').trim() || (e.behavior||'').trim() ||
+      (e.caregiverIntv||'').trim() || (e.bhtIntv||'').trim() || (e.response||'').trim()
+    );
+    if (!incidents.length) {
+      rows.push({...baseFields, 'Incident #': '', 'Incident Time': '', Antecedent: '', Behavior: '', 'Caregiver Intervention': '', 'BHT Intervention': '', 'Client Response': ''});
+    } else {
+      incidents.forEach((e, idx) => {
+        rows.push({
+          ...baseFields,
+          'Incident #': idx + 1,
+          'Incident Time': e.time || '',
+          'Antecedent': e.antecedent || '',
+          'Behavior': e.behavior || '',
+          'Caregiver Intervention': e.caregiverIntv || '',
+          'BHT Intervention': e.bhtIntv || '',
+          'Client Response': e.response || ''
+        });
+      });
+    }
+  });
+  return rows;
+}
+
+function buildWorkbook(rows) {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows);
+  // Set column widths
+  const cols = [
+    {wch:12},{wch:22},{wch:10},{wch:10},{wch:10},{wch:14},{wch:22},{wch:18},
+    {wch:30},{wch:24},{wch:20},{wch:10},{wch:30},{wch:28},{wch:16},{wch:28},{wch:18},
+    {wch:10},{wch:12},{wch:30},{wch:30},{wch:28},{wch:28},{wch:30}
+  ];
+  ws['!cols'] = cols;
+  XLSX.utils.book_append_sheet(wb, ws, 'BHT Reports');
+  return wb;
+}
+
+function doExport(existingRows) {
+  closeExportModal();
+  const db = getDB();
+  let rows = dbToRows(db);
+
+  if (existingRows && existingRows.length) {
+    // Merge: build set of existing "date|incident#" keys
+    const existingKeys = new Set(existingRows.map(r => `${r['Service Date']}|${r['Incident #']}`));
+    // Add only rows not already in existing
+    const newRows = rows.filter(r => !existingKeys.has(`${r['Service Date']}|${r['Incident #']}`));
+    // Update existing rows if same key exists (upsert)
+    const merged = existingRows.map(er => {
+      const match = rows.find(r => r['Service Date'] === er['Service Date'] && r['Incident #'] === er['Incident #']);
+      return match ? match : er;
+    });
+    // Append truly new rows
+    newRows.forEach(r => {
+      if (!existingRows.find(er => er['Service Date'] === r['Service Date'] && er['Incident #'] === r['Incident #'])) {
+        merged.push(r);
+      }
+    });
+    rows = merged;
+  }
+
+  const wb = buildWorkbook(rows);
+  XLSX.writeFile(wb, 'BHT_Reports.xlsx');
+  showToast('Exported to BHT_Reports.xlsx ✓');
+}
+
+function doExportMerge() {
+  if (!pendingExcelFile) { doExport(null); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const existingRows = XLSX.utils.sheet_to_json(ws);
+      doExport(existingRows);
+    } catch(err) {
+      showToast('Error reading file — exporting fresh');
+      doExport(null);
+    }
+  };
+  reader.readAsArrayBuffer(pendingExcelFile);
+}
+
+// ── IMPORT FROM LOCAL EXCEL ───────────────────────────────
+let pendingImportRows = null;
+
+function openImportModal() {
+  pendingImportRows = null;
+  document.getElementById('import-drop-label').innerHTML = '&#x1F4C2; <span>Click to upload</span> BHT_Reports.xlsx';
+  document.getElementById('import-drop-zone').classList.remove('has-file');
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('import-preview').innerHTML = '';
+  document.getElementById('btn-import-go').disabled = true;
+  document.getElementById('import-file-input').value = '';
+  document.getElementById('import-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  pendingImportRows = null;
+}
+
+function onImportFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      if (!rows.length) { showToast('File is empty or invalid'); return; }
+
+      // Validate expected columns
+      const required = ['Service Date','Client Name','Antecedent'];
+      const cols = Object.keys(rows[0]);
+      const missing = required.filter(r => !cols.includes(r));
+      if (missing.length) {
+        showToast('Invalid file — missing columns: ' + missing.join(', '));
+        return;
+      }
+
+      pendingImportRows = rows;
+
+      // Show preview — group by date
+      const dateCounts = {};
+      rows.forEach(r => {
+        const d = r['Service Date'] || 'Unknown';
+        if (!dateCounts[d]) dateCounts[d] = {incidents:0, client:r['Client Name']||''};
+        if ((r['Antecedent']||'').trim() || (r['Behavior']||'').trim()) dateCounts[d].incidents++;
+      });
+
+      const dates = Object.keys(dateCounts).sort();
+      const preview = document.getElementById('import-preview');
+      preview.innerHTML = '<div style="font-weight:600;margin-bottom:6px;font-size:12px;">Found ' + dates.length + ' date(s):</div>' +
+        dates.map(d => `<div class="import-preview-row"><span>${d} &nbsp; <span style="color:var(--ink3)">${dateCounts[d].client}</span></span><span style="color:var(--accent);font-weight:600;">${dateCounts[d].incidents} incident(s)</span></div>`).join('');
+      preview.style.display = 'block';
+
+      document.getElementById('import-drop-label').innerHTML = '&#x2705; <span>' + file.name + '</span> — ' + rows.length + ' rows found';
+      document.getElementById('import-drop-zone').classList.add('has-file');
+      document.getElementById('btn-import-go').disabled = false;
+
+    } catch(err) {
+      showToast('Error reading file: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function doImport() {
+  if (!pendingImportRows || !pendingImportRows.length) return;
+
+  // Reconstruct DB from Excel rows
+  // Group rows by Service Date
+  const grouped = {};
+  pendingImportRows.forEach(row => {
+    const date = String(row['Service Date'] || '').trim();
+    if (!date) return;
+    if (!grouped[date]) grouped[date] = [];
+    grouped[date].push(row);
+  });
+
+  const db = getDB();
+  let datesRestored = 0;
+
+  Object.keys(grouped).forEach(date => {
+    const rows = grouped[date];
+    const first = rows[0]; // Profile info from first row of that date
+
+    // Reconstruct entries (incidents)
+    const entriesFromExcel = rows
+      .filter(r => (r['Antecedent']||'').trim() || (r['Behavior']||'').trim() ||
+                   (r['Caregiver Intervention']||'').trim() || (r['BHT Intervention']||'').trim() ||
+                   (r['Client Response']||'').trim())
+      .map((r, idx) => ({
+        id: idx + 1,
+        time: String(r['Incident Time'] || ''),
+        antecedent: String(r['Antecedent'] || ''),
+        behavior: String(r['Behavior'] || ''),
+        caregiverIntv: String(r['Caregiver Intervention'] || ''),
+        bhtIntv: String(r['BHT Intervention'] || ''),
+        response: String(r['Client Response'] || ''),
+        goals: [],
+        collapsed: false
+      }));
+
+    // Parse persons present back to array-friendly string
+    const record = {
+      clientName: String(first['Client Name'] || ''),
+      serviceDate: date,
+      startTime: String(first['Start Time'] || ''),
+      endTime: String(first['End Time'] || ''),
+      totalHours: String(first['Total Hours'] || ''),
+      sessionType: String(first['Session Type'] || 'in-person'),
+      personsPresent: String(first['Persons Present'] || ''),
+      location: String(first['Location'] || ''),
+      goal1: String(first['Goal 1'] || ''),
+      goal2: String(first['Goal 2'] || ''),
+      goal3: String(first['Goal 3'] || ''),
+      atRisk: String(first['At Risk'] || 'No'),
+      howManaged: String(first['How Managed'] || ''),
+      transferOfSkills: String(first['Transfer of Skills'] || ''),
+      nextServiceDate: String(first['Next Service Date'] || ''),
+      nextPlan: String(first['Next Plan'] || ''),
+      staffName: String(first['Staff Name'] || ''),
+      audioPh: '',
+      audioReason: '',
+      entries: entriesFromExcel,
+      savedAt: new Date().toISOString()
+    };
+
+    db[date] = record;
+    datesRestored++;
+  });
+
+  saveDB(db);
+  closeImportModal();
+  loadAllRecords();
+  showToast(datesRestored + ' date(s) restored to browser ✓');
+}
+
+// ── SETTINGS ──────────────────────────────────────────────
+const CFG_KEY = 'bht_config_v1';
+
+function getConfig() {
+  try { return JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); } catch(e) { return {}; }
+}
+function saveConfig(cfg) { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+
+// Load settings into the settings form
+function loadSettingsForm() {
+  const cfg = getConfig();
+  if (cfg.clientName !== undefined) document.getElementById('cfg-clientName').value = cfg.clientName;
+  if (cfg.staffName !== undefined) document.getElementById('cfg-staffName').value = cfg.staffName;
+  if (cfg.startTime) {
+    document.getElementById('cfg-startTime').value = cfg.startTime;
+    document.getElementById('cfg-endTime').value = cfg.endTime||'';
+    calcCfgHours();
+  }
+  // Session type
+  const st = cfg.sessionType||'in-person';
+  document.querySelectorAll('input[name="cfg-session"]').forEach(i=>{
+    const p=i.closest('.check-pill');
+    if(i.value===st){i.checked=true;p.classList.add('checked');}
+    else{i.checked=false;p.classList.remove('checked');}
+  });
+  // Persons
+  const persons = cfg.personsPresent ? cfg.personsPresent.split(',').map(s=>s.trim()) : ['Teacher'];
+  document.querySelectorAll('input[name="cfg-persons"]').forEach(i=>{
+    const p=i.closest('.check-pill');
+    if(persons.includes(i.value)){i.checked=true;p.classList.add('checked');}
+    else{i.checked=false;p.classList.remove('checked');}
+  });
+  // Location
+  const locs = cfg.location ? cfg.location.split(',').map(s=>s.trim()) : ['School'];
+  document.querySelectorAll('input[name="cfg-location"]').forEach(i=>{
+    const p=i.closest('.check-pill');
+    if(locs.includes(i.value)){i.checked=true;p.classList.add('checked');}
+    else{i.checked=false;p.classList.remove('checked');}
+  });
+  // Summary defaults
+  const defs = getConfigDefaults();
+  document.getElementById('cfg-mgmt').value = cfg.mgmt !== undefined ? cfg.mgmt : defs.mgmt;
+  document.getElementById('cfg-transfer').value = cfg.transfer !== undefined ? cfg.transfer : defs.transfer;
+  document.getElementById('cfg-nextPlan').value = cfg.nextPlan !== undefined ? cfg.nextPlan : defs.nextPlan;
+
+  // Goals
+  const goals = cfg.goals || ['Decrease Non-compliant Behaviors','Increase Social Skills','Decrease Aggression'];
+  document.getElementById('cfg-goals-list').innerHTML = '';
+  goals.forEach(g => addCfgGoal(g));
+  // Signature
+  if (cfg.signatureDataUrl) {
+    document.getElementById('sig-preview-img').src = cfg.signatureDataUrl;
+    document.getElementById('sig-preview').classList.add('show');
+    document.getElementById('sig-drop-label').innerHTML = '&#x2713; <span>Signature loaded</span>';
+    document.getElementById('sig-drop-zone').classList.add('has-file');
+  }
+}
+
+function calcCfgHours() {
+  const st = document.getElementById('cfg-startTime').value;
+  const et = document.getElementById('cfg-endTime').value;
+  if (!st || !et) return;
+  const [sh,sm]=st.split(':').map(Number);
+  const [eh,em]=et.split(':').map(Number);
+  let mins=(eh*60+em)-(sh*60+sm);
+  if(mins<=0) mins+=24*60;
+  const hrs=mins/60;
+  document.getElementById('cfg-totalHrs').value = Number.isInteger(hrs)?hrs.toString():hrs.toFixed(2);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('cfg-startTime').addEventListener('change', calcCfgHours);
+  document.getElementById('cfg-endTime').addEventListener('change', calcCfgHours);
+  // Pre-load settings form values
+  loadSettingsForm();
+});
+
+function setCfgSession(val, el) {
+  document.querySelectorAll('input[name="cfg-session"]').forEach(i=>i.closest('.check-pill').classList.remove('checked'));
+  el.classList.add('checked');
+  el.querySelector('input').checked = true;
+}
+
+function toggleCfgCheck(el) {
+  el.classList.toggle('checked');
+  el.querySelector('input').checked = !el.querySelector('input').checked;
+}
+
+function addCfgGoal(text) {
+  const list = document.getElementById('cfg-goals-list');
+  const idx = list.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'goal-item';
+  div.innerHTML = `<span style="font-size:12px;font-weight:600;color:var(--ink3);min-width:28px;">G${idx}</span>
+    <input type="text" placeholder="Goal ${idx} description..." value="${text.replace(/"/g,'&quot;')}"/>
+    <button class="btn-del-goal" onclick="delCfgGoal(this)" title="Remove goal">×</button>`;
+  list.appendChild(div);
+  renumberGoals();
+}
+
+function delCfgGoal(btn) {
+  btn.closest('.goal-item').remove();
+  renumberGoals();
+}
+
+function renumberGoals() {
+  document.querySelectorAll('#cfg-goals-list .goal-item').forEach((item,i)=>{
+    item.querySelector('span').textContent = 'G'+(i+1);
+    item.querySelector('input').placeholder = 'Goal '+(i+1)+' description...';
+  });
+}
+
+function onSigUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    document.getElementById('sig-preview-img').src = dataUrl;
+    document.getElementById('sig-preview').classList.add('show');
+    document.getElementById('sig-drop-label').innerHTML = '&#x2713; <span>'+file.name+'</span> loaded';
+    document.getElementById('sig-drop-zone').classList.add('has-file');
+    // Store temporarily
+    window._pendingSigDataUrl = dataUrl;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearSig() {
+  window._pendingSigDataUrl = null;
+  document.getElementById('sig-preview').classList.remove('show');
+  document.getElementById('sig-preview-img').src = '';
+  document.getElementById('sig-drop-label').innerHTML = '&#x270D; <span>Click to upload</span> signature image (PNG/JPG)';
+  document.getElementById('sig-drop-zone').classList.remove('has-file');
+  document.getElementById('sig-upload').value = '';
+  // Remove from config
+  const cfg = getConfig();
+  delete cfg.signatureDataUrl;
+  saveConfig(cfg);
+}
+
+function saveSettings() {
+  const cfg = getConfig();
+
+  cfg.clientName = document.getElementById('cfg-clientName').value.trim();
+  cfg.staffName = document.getElementById('cfg-staffName').value.trim();
+  cfg.startTime = document.getElementById('cfg-startTime').value;
+  cfg.endTime = document.getElementById('cfg-endTime').value;
+  cfg.totalHours = document.getElementById('cfg-totalHrs').value;
+  cfg.sessionType = document.querySelector('input[name="cfg-session"]:checked')?.value || 'in-person';
+  cfg.mgmt = document.getElementById('cfg-mgmt').value;
+  cfg.transfer = document.getElementById('cfg-transfer').value;
+  cfg.nextPlan = document.getElementById('cfg-nextPlan').value;
+
+  // Persons
+  const persons = [...document.querySelectorAll('input[name="cfg-persons"]:checked')].map(i=>i.value);
+  cfg.personsPresent = persons.join(', ');
+
+  // Location
+  const locs = [...document.querySelectorAll('input[name="cfg-location"]:checked')].map(i=>i.value);
+  cfg.location = locs.join(', ');
+
+  // Goals
+  const goals = [...document.querySelectorAll('#cfg-goals-list .goal-item input')].map(i=>i.value.trim()).filter(Boolean);
+  cfg.goals = goals;
+
+  // Signature
+  if (window._pendingSigDataUrl) cfg.signatureDataUrl = window._pendingSigDataUrl;
+
+  saveConfig(cfg);
+  showToast('Settings saved ✓');
+
+  // Also update the dynamic goal fields on session info page
+  applyGoalsToSession(goals);
+}
+
+// Apply dynamic goals to the session info form
+function applyGoalsToSession(goals) {
+  const container = document.getElementById('goals-container');
+  if (!container) return;
+  container.innerHTML = goals.map((g,i)=>
+    `<div class="field"><label>Goal ${i+1}</label><input type="text" id="goal${i+1}" value="${g.replace(/"/g,'&quot;')}" oninput="triggerAutoSave()"/></div>`
+  ).join('');
+}
+
+// Get config and use for new form defaults
+// Get next working day (Mon-Fri) from a date string yyyy-mm-dd
+function getNextWorkingDay(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00');
+  do { d.setDate(d.getDate() + 1); } while (d.getDay() === 0 || d.getDay() === 6);
+  return d.toISOString().split('T')[0];
+}
+
+function getConfigDefaults() {
+  const cfg = getConfig();
+  return {
+    clientName: cfg.clientName || 'Bruce Ford Carter II',
+    staffName: cfg.staffName || 'Yasoda Vegi',
+    startTime: cfg.startTime || '08:15',
+    endTime: cfg.endTime || '16:15',
+    totalHours: cfg.totalHours || '8',
+    sessionType: cfg.sessionType || 'in-person',
+    personsPresent: cfg.personsPresent || 'Teacher',
+    location: cfg.location || 'School',
+    goals: cfg.goals || ['Decrease Non-compliant Behaviors','Increase Social Skills','Decrease Aggression'],
+    signatureDataUrl: cfg.signatureDataUrl || null,
+    mgmt: cfg.mgmt !== undefined ? cfg.mgmt : 'Taking him for a walk, giving him sensory breaks, talking about turn-taking and sharing.',
+    transfer: cfg.transfer !== undefined ? cfg.transfer : 'Taking sensory breaks to reduce anger, turn-taking.',
+    nextPlan: cfg.nextPlan !== undefined ? cfg.nextPlan : 'Role playing social scenarios to practise appropriate respond to adult'
+  };
+}
+
+// Get signature for print — config signature takes priority over hardcoded
+function getPrintSignatureSrc() {
+  const cfg = getConfig();
+  return cfg.signatureDataUrl || null;
+}
+
+// ── GROUP SESSION TIMES PANEL ────────────────────────────
+function renderGrpTimesPanel(){
+  const sp=getChecked('persons'), sl=getChecked('location');
+  const sessKey=sp.slice().sort().join(',')+'|||'+sl.slice().sort().join(',');
+
+  // Find all non-main groups from entries
+  const groups={};
+  entries.forEach(e=>{
+    const p=[...(e.entryPersons&&e.entryPersons.length?e.entryPersons:sp)].sort().join(',');
+    const l=[...(e.entryLocation&&e.entryLocation.length?e.entryLocation:sl)].sort().join(',');
+    const k=p+'|||'+l;
+    if(!groups[k]){
+      groups[k]={persons:p?p.split(','):[],locs:l?l.split(','):[]};
+    }
+  });
+
+  const keys=Object.keys(groups);
+  const panel=document.getElementById('grp-times-panel');
+  const rows=document.getElementById('grp-times-rows');
+  if(!panel||!rows) return;
+
+  // Always show panel — show all groups including main session
+  panel.style.display='block';
+  rows.innerHTML='';
+
+  // Sync Next Service Date and Plan from summary fields
+  const ndField=document.getElementById('print-nextDate');
+  const npField=document.getElementById('print-nextPlan');
+  if(ndField) ndField.value=gv('nextDate')||'';
+  if(npField) npField.value=gv('nextPlan')||'';
+
+  keys.forEach(k=>{
+    const g=groups[k];
+    const isMain=(k===sessKey);
+    const saved=groupSessionTimes[k]||null;
+    const st=saved?saved.startTime:(isMain?gv('startTime'):'');
+    const et=saved?saved.endTime:(isMain?gv('endTime'):'');
+
+    // Compute total hrs display
+    let hrsLabel='';
+    if(st&&et){
+      const[sh,sm]=st.split(':').map(Number);
+      const[eh,em]=et.split(':').map(Number);
+      let mins=(eh*60+em)-(sh*60+sm);
+      if(mins<=0) mins+=24*60;
+      const h=Math.floor(mins/60),m=mins%60;
+      hrsLabel=m===0?h+' hrs':h+' hrs '+m+' min';
+    }
+
+    const safeKey=k.replace(/[^a-zA-Z0-9]/g,'_');
+    const label=g.locs.join(', ')+' / '+g.persons.join(', ')+(isMain?' (Main)':'');
+    // Next working day from currentDate (or saved nextServiceDate)
+    const savedNd=saved&&saved.nextServiceDate?saved.nextServiceDate:(isMain?gv('nextDate'):'');
+    const nextWD=savedNd||getNextWorkingDay(currentDate||new Date().toISOString().split('T')[0]);
+
+    const row=document.createElement('div');
+    row.style.cssText='margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);';
+    row.innerHTML=`
+      <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:${isMain?'var(--success)':'var(--accent)'};display:inline-block;flex-shrink:0;"></span>
+        ${label}
+        ${hrsLabel?`<span style="font-size:11px;font-weight:600;color:var(--success);background:var(--success-light);padding:2px 8px;border-radius:99px;">${hrsLabel}</span>`:'<span style="font-size:11px;color:var(--warn);font-weight:600;">&#x26A0; No time set</span>'}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:flex-end;">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--ink3);display:block;margin-bottom:3px;">Start Time</label>
+          <input type="time" id="grpst_${safeKey}" value="${st}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;" oninput="saveGrpTimeInline('${k}','${safeKey}')"/>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--ink3);display:block;margin-bottom:3px;">End Time</label>
+          <input type="time" id="grpet_${safeKey}" value="${et}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;" oninput="saveGrpTimeInline('${k}','${safeKey}')"/>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--ink3);display:block;margin-bottom:3px;">&#x1F4C5; Next Service Date</label>
+          <input type="date" id="grpnd_${safeKey}" value="${nextWD}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"/>
+        </div>
+        <button onclick="applyGrpTime('${k}','${safeKey}')" style="padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">&#x2713; Apply</button>
+      </div>`;
+    rows.appendChild(row);
+  });
+}
+
+function saveGrpTimeInline(key, safeKey){
+  // Live preview only — actual save happens on Apply
+  const st=document.getElementById('grpst_'+safeKey)?.value||'';
+  const et=document.getElementById('grpet_'+safeKey)?.value||'';
+  if(st&&et){
+    const[sh,sm]=st.split(':').map(Number);
+    const[eh,em]=et.split(':').map(Number);
+    let mins=(eh*60+em)-(sh*60+sm);
+    if(mins<=0) mins+=24*60;
+    const h=Math.floor(mins/60),m=mins%60;
+    const label=m===0?h+' hrs':h+' hrs '+m+' min';
+    // Update hrs badge in this row
+    const btn=document.getElementById('grpst_'+safeKey)?.closest('div')?.parentElement?.previousElementSibling;
+    if(btn){
+      const badge=btn.querySelector('span:last-child');
+      if(badge) badge.outerHTML=`<span style="font-size:11px;font-weight:600;color:var(--success);background:var(--success-light);padding:2px 8px;border-radius:99px;">${label}</span>`;
+    }
+  }
+}
+
+function applyGrpTime(key, safeKey){
+  const st=document.getElementById('grpst_'+safeKey)?.value||'';
+  const et=document.getElementById('grpet_'+safeKey)?.value||'';
+  if(!st||!et){showToast('Please enter both start and end time');return;}
+  const nd=document.getElementById('grpnd_'+safeKey)?.value||'';
+  // Save per-group — do NOT overwrite the main nextDate field
+  groupSessionTimes[key]={startTime:st,endTime:et,nextServiceDate:nd};
+  // Only update main nextDate if this IS the main session group
+  const sessKey=getChecked('persons').slice().sort().join(',')+'|||'+getChecked('location').slice().sort().join(',');
+  if(key===sessKey){
+    const ndEl=document.getElementById('nextDate');
+    if(ndEl&&nd) ndEl.value=nd;
+  }
+  triggerAutoSave();
+  buildPrint();
+  renderGrpTimesPanel();
+  showToast('Session time saved \u2713');
+}
+
+// ── MULTI-DATE PRINT ──────────────────────────────────────
+function printSelectedDates(){
+  const _multiSig=window._BHT_SIG||getPrintSignatureSrc()||'';
+  const checked=[...document.querySelectorAll('.date-chk:checked')].map(c=>c.dataset.date);
+  if(!checked.length){showToast('Select at least one date');return;}
+  const db=getDB();
+  const dates=checked.slice().sort((a,b)=>new Date(a)-new Date(b));
+  const chk=(val,match)=>val===match?'&#9745;':'&#9744;';
+  const allPersons=['Parent','Teacher','BC','Other'];
+  const allLocs=['Home','School','Community','Camp'];
+
+  function _fmtDateShort(d){
+    if(!d)return'';
+    const dt=new Date(d+'T12:00');
+    return (dt.getMonth()+1)+'/'+String(dt.getDate()).padStart(2,'0')+'/'+dt.getFullYear();
+  }
+  function _fmtHours(val){
+    const n=parseFloat(val);if(isNaN(n))return val||'';
+    const tot=Math.round(n*60),h=Math.floor(tot/60),m=tot%60;
+    return m===0?String(h):(h+' hours '+m+' minutes');
+  }
+  function _fmt12hr(t){
+    if(!t)return'';
+    const[h,m]=t.split(':').map(Number);
+    return (h%12||12)+':'+(m<10?'0':'')+m+(h>=12?' pm':' am');
+  }
+  function _fmtDate2(d){
+    if(!d)return'';
+    return new Date(d+'T12:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+  }
+
+  const thead=`<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:6px;">
+    <thead><tr style="background:#f0f0f0;">
+      <th style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:10.5px;width:23%;">Antecedent<br/><span style="font-weight:400;font-size:10px;">(What occurred before the behavior)</span></th>
+      <th style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:10.5px;width:23%;">Describe Behavior<br/><span style="font-weight:400;font-size:10px;">(Child's response to antecedent)</span></th>
+      <th style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:10.5px;width:30%;">Interventions Used by<br/><span style="font-weight:400;font-size:10px;">1 Caregiver/Educator &nbsp; 2. TSS</span></th>
+      <th style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:10.5px;width:24%;">Client's Response<br/><span style="font-weight:400;font-size:10px;">to the intervention(s)</span></th>
+    </tr></thead><tbody>`;
+
+  let html='';
+  let firstPage=true;
+
+  dates.forEach(date=>{
+    const r=db[date];if(!r)return;
+    const recEntries=r.entries||[];
+    const recGrpTimes=r.groupSessionTimes||{};
+    const sessPersons=r.personsPresent?r.personsPresent.split(',').map(s=>s.trim()):[];
+    const sessLocs=r.location?r.location.split(',').map(s=>s.trim()):[];
+    const stVal=r.sessionType||'in-person';
+    const riskVal=r.atRisk||'No';
+    const goals=r.goals||(r.goal1||r.goal2||r.goal3?[r.goal1,r.goal2,r.goal3].filter(Boolean):[]);
+    const goalsText=goals.map((g,i)=>`${i+1}. ${g}`).join(' &nbsp; ');
+
+    const printEntries=recEntries.filter(e=>(e.antecedent||'').trim()||(e.behavior||'').trim()||(e.caregiverIntv||'').trim()||(e.bhtIntv||'').trim()||(e.response||'').trim());
+    const groupOrder=[],groupMap={};
+    printEntries.forEach(e=>{
+      const p=[...(e.entryPersons&&e.entryPersons.length?e.entryPersons:sessPersons)].sort().join(',');
+      const l=[...(e.entryLocation&&e.entryLocation.length?e.entryLocation:sessLocs)].sort().join(',');
+      const k=p+'|||'+l;
+      if(!groupMap[k]){groupMap[k]=[];groupOrder.push(k);}
+      groupMap[k].push(e);
+    });
+    if(groupOrder.length===0)groupOrder.push('|||');
+
+    const reportGroups=groupOrder.map(k=>{
+      const parts=k.split('|||');
+      const pArr=parts[0]?parts[0].split(','):sessPersons;
+      const lArr=parts[1]?parts[1].split(','):sessLocs;
+      const grpE=groupMap[k]||[];
+      const grpPages=[];
+      if(grpE.length===0){grpPages.push([]);}
+      else{for(let i=0;i<grpE.length;i+=4)grpPages.push(grpE.slice(i,i+4));}
+      return{pArr,lArr,grpPages};
+    });
+
+    reportGroups.forEach((grp,grpIdx)=>{
+      const grpPersonsHtml=allPersons.map(p=>`${chk(grp.pArr.includes(p)?p:'__',p)} ${p}`).join(' &nbsp; ');
+      const grpLocsHtml=allLocs.map(l=>`${chk(grp.lArr.includes(l)?l:'__',l)} ${l}`).join(' &nbsp; ');
+      const grpTotalPages=grp.grpPages.length;
+      const grpKey=grp.pArr.slice().sort().join(',')+'|||'+grp.lArr.slice().sort().join(',');
+      const sessKey=sessPersons.slice().sort().join(',')+'|||'+sessLocs.slice().sort().join(',');
+      const isMain=(grpKey===sessKey);
+      const saved=recGrpTimes[grpKey]||null;
+      const st=saved?saved.startTime:(isMain?r.startTime||'':'');
+      const et=saved?saved.endTime:(isMain?r.endTime||'':'');
+      let grpHrs=isMain?_fmtHours(r.totalHours||r.totalHrs||''):'';
+      if(st&&et){
+        const[sh,sm]=st.split(':').map(Number),[eh,em]=et.split(':').map(Number);
+        let mins=(eh*60+em)-(sh*60+sm);if(mins<=0)mins+=24*60;
+        const h=Math.floor(mins/60),mn=mins%60;
+        grpHrs=mn===0?String(h):(h+' hours '+mn+' minutes');
+      }
+
+      function _clientBlock(){
+        return `<table style="width:100%;border:none;border-collapse:collapse;font-size:12px;margin-bottom:5px;">
+          <tr>
+            <td style="border:none;padding:2px 4px 2px 0;">Client Name: <u><strong>${r.clientName||''}</strong></u></td>
+            <td style="border:none;padding:2px 4px;">Service Date: ${_fmtDateShort(date)}</td>
+            <td style="border:none;padding:2px 4px;">Start: <strong>${_fmt12hr(st)}</strong></td>
+            <td style="border:none;padding:2px 4px;">End: <strong>${_fmt12hr(et)}</strong></td>
+            <td style="border:none;padding:2px 0;">Total Hrs: <strong>${grpHrs}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="2" style="border:none;padding:2px 0;">Persons Present: &nbsp; ${grpPersonsHtml}</td>
+            <td colspan="3" style="border:none;padding:2px 0;">Location: &nbsp; ${grpLocsHtml}</td>
+          </tr>
+          <tr><td colspan="5" style="border:none;padding:2px 0;">Goals worked on: ${goalsText}</td></tr>
+        </table>`;
+      }
+
+      function _fullHeader(){
+        return `<div style="text-align:center;margin-bottom:6px;">
+            <div style="font-size:18px;font-weight:700;">OMNI HEALTH SERVICES</div>
+            <div style="font-size:15px;font-weight:700;">BHT Daily Report</div>
+          </div>
+          <table style="width:100%;border:none;border-collapse:collapse;font-size:13px;margin-bottom:2px;">
+            <tr>
+              <td style="border:none;padding:2px 0;width:55%;vertical-align:top;">
+                <div>${chk(stVal,'in-person')} In person session</div>
+                <div style="margin-top:3px;">${chk(stVal,'telehealth')} Telehealth only &ndash; Verbal Consent obtained &nbsp;&nbsp;&nbsp; ${chk(stVal,'audio')} Audio / Video</div>
+                <div style="margin-top:3px;padding-left:20px;">${chk(stVal,'audio')} Audio Only &ndash; Ph number: ${r.audioPh||''}</div>
+              </td>
+              <td style="border:none;padding:2px 0;vertical-align:top;text-align:right;">
+                <strong>Reason for Audio Only:</strong> ${r.audioReason||''}
+              </td>
+            </tr>
+          </table>
+          ${_clientBlock()}`;
+      }
+
+      grp.grpPages.forEach((pe,pi)=>{
+        // Every page except very first gets a page break
+        const needBreak=!firstPage;
+        firstPage=false;
+        const header=pi===0?_fullHeader():_clientBlock();
+        html+=`<div class="print-page" style="${needBreak?'page-break-before:always;':''}">${header}${thead}`;
+        pe.forEach(e=>{
+          const td='border:1px solid #999;padding:6px 7px;vertical-align:top;';
+          const c1=(e.caregiverIntv||'').trim(),c2=(e.bhtIntv||'').trim();
+          let intv=c1?'1. '+c1:'1.';if(c2)intv+='<br/>2. '+c2;
+          html+=`<tr><td style="${td}">${e.antecedent||''}</td><td style="${td}">${e.behavior||''}</td><td style="${td}">${intv}</td><td style="${td}">${e.response||''}</td></tr>`;
+        });
+        html+='</tbody></table>';
+        if(pi===grpTotalPages-1){
+          const fl='flex:1;border-bottom:2px solid #000;margin-left:8px;';
+          const sigSrc=_multiSig;
+          html+=`<div style="font-size:12px;margin-top:4px;">
+            <div style="display:flex;align-items:flex-end;padding:6px 0;"><span style="white-space:nowrap;"><strong>At Risk Behavior:</strong> &nbsp; ${chk(riskVal,'No')} No &nbsp;&nbsp; ${chk(riskVal,'Yes')} Yes</span></div>
+            <div style="display:flex;align-items:flex-end;padding:6px 0;"><span style="white-space:nowrap;"><strong>How Behavior Was Managed:</strong></span><span style="${fl}">${r.howManaged||''}</span></div>
+            <div style="display:flex;align-items:flex-end;padding:6px 0;"><span style="white-space:nowrap;"><strong>Transfer of Skills:</strong></span><span style="${fl}">${r.transferOfSkills||''}</span></div>
+            <div style="display:flex;align-items:flex-end;padding:6px 0;"><span style="white-space:nowrap;"><strong>Next Service Date with Plan:</strong></span><span style="${fl}">${_fmtDate2(r.nextServiceDate||'')}${r.nextPlan?' &nbsp; '+r.nextPlan:''}</span></div>
+            <div style="display:flex;align-items:flex-end;padding:6px 0;">
+              <span style="white-space:nowrap;"><strong>*Staff Signature(with title and credentials):</strong></span>
+              <span style="flex:1;margin-left:8px;border-bottom:2px solid #000;display:flex;flex-direction:row;align-items:flex-end;">
+                <img src="${sigSrc}" style="height:38px;width:auto;object-fit:contain;display:block;margin-bottom:2px;filter:contrast(1.2);" alt="Signature"/>&nbsp;<span style="font-size:11px;font-weight:600;color:#333;">(BHT)</span>
+              </span>
+              <span style="white-space:nowrap;margin-left:20px;"><strong>Staff Name(print):</strong></span>
+              <span style="flex:1;border-bottom:2px solid #000;margin-left:8px;padding-bottom:2px;">${r.staffName||'Yasoda Vegi'}</span>
+            </div>
+          </div>
+          <div style="margin-top:6px;font-size:12px;font-style:italic;color:#333;">*My signature verifies that the information on this form is accurate. Submission of any false claims or statements is a Federal offense and punishable by law.</div>`;
+        }
+        html+='</div>';
+      });
+    });
+  });
+
+  // Append all data sheets for each selected date from storage
+  const dsDB = getDSDB();
+  dates.forEach(date=>{
+    const dateKeys = Object.keys(dsDB).filter(k=>k.startsWith(date+'|||'));
+    dateKeys.forEach(k=>{
+      const rec = dsDB[k];
+      if(!rec||!rec.data) return;
+      let data = rec.data.map(r=>[...r]);
+      if(data.length===3){
+        data=[data[0],[0,0,0,0,0,0,0,0,0,0,0,0],data[1],[0,0,0,0,0,0,0,0,0,0,0,0],data[2],[0,0,0,0,0,0,0,0,0,0,0,0]];
+      }
+      const hasData = data.some(row=>row.some(v=>v>0));
+      if(!hasData) return;
+      const page = buildDSPrintPageFromData(date, rec.loc||'', data);
+      if(page) html += page;
+    });
+  });
+
+  // Append timesheets if checkbox checked
+  const inclTS = document.getElementById('chk-include-timesheet')?.checked;
+  if(inclTS){
+    // Find unique weeks from selected dates
+    const weeks = {};
+    dates.forEach(date=>{
+      const sun = getSunday(date);
+      if(!weeks[sun]) weeks[sun]=sun;
+    });
+    // For each week, build timesheet HTML
+    Object.keys(weeks).sort().forEach(sunday=>{
+      html += buildTSPrintHTML(sunday);
+    });
+  }
+
+  // Set HTML and switch to print tab without triggering buildPrint
+  document.getElementById('print-area').innerHTML=html;
+  _skipBuildPrint=true;
+  switchTab('print');
+  setTimeout(()=>window.print(),400);
+}
+
+// ── BUILD DATA SHEET PAGE FOR COMBINED PRINT ──────────────
+// Wrapper for single-date print (uses current dsData in memory)
+function buildDSPrintPage(){
+  const hasData = dsData.some(row=>row.some(v=>v>0));
+  if(!hasData) return null;
+  return buildDSPrintPageFromData(currentDate, dsGetLoc(), dsData);
+}
+
+// Core renderer — accepts date, loc string, and data array directly
+// Used by both single-date and multi-date print
+function buildDSPrintPageFromData(date, loc, data){
+  const behaviors = getDSBehaviors();
+  const cfg = getConfig();
+  const clientName = cfg.clientName||'Bruce Ford Carter II';
+  const staffName = cfg.staffName||'Yasoda Vegi';
+  const sigSrc = window._BHT_SIG||getPrintSignatureSrc()||'';
+
+  function fmtDate(d){
+    if(!d)return'';
+    const dt=new Date(d+'T12:00');
+    return (dt.getMonth()+1)+'/'+dt.getDate()+'/'+dt.getFullYear();
+  }
+
+  function printTally(n){
+    if(n===0)return'';
+    const w=36,h=24;
+    let lines='';
+    const vLines=Math.min(n,4);
+    for(let i=0;i<vLines;i++){
+      const x=5+i*7;
+      lines+=`<line x1="${x}" y1="2" x2="${x}" y2="${h-2}" stroke="#000" stroke-width="1.5"/>`;
+    }
+    if(n===5){
+      lines+=`<line x1="2" y1="${h-2}" x2="${w-2}" y2="2" stroke="#000" stroke-width="1.5"/>`;
+    }
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;margin:auto;">${lines}</svg>`;
+  }
+
+  const allLocs=['Home','School','Community','Camp'];
+  const locChks=allLocs.map(l=>`${loc===l||loc.includes(l)?'&#9745;':'&#9744;'} ${l}`).join(' &nbsp; ');
+
+  const DS_HOURS_PRINT=['8 am-9 am','9 am-10 am','10 am-11 am','11 am-12 noon','12 noon-1 pm','1 pm-2 pm','2 pm-3 pm','3 pm-4 pm','4 pm-5 pm','5 pm-6 pm','6 pm-7 pm','7 pm-8 pm'];
+
+  const groups=[
+    {tLabel:`1 -T ${behaviors[0].t}`, rLabel:`R-${behaviors[0].r}`, tRow:0, rRow:1},
+    {tLabel:`2 -T ${behaviors[1].t}`, rLabel:`R ${behaviors[1].r}`,  tRow:2, rRow:3},
+    {tLabel:`3 -T ${behaviors[2].t}`, rLabel:`R ${behaviors[2].r}`,  tRow:4, rRow:5},
+  ];
+
+  const tableRows=groups.map(({tLabel,rLabel,tRow,rRow})=>{
+    const tTotal=data[tRow].reduce((a,b)=>a+b,0);
+    const rTotal=data[rRow].reduce((a,b)=>a+b,0);
+    const hasAny=tTotal>0||rTotal>0;
+    const cells=data[tRow].map((_,col)=>`
+      <td style="border:1px solid #999;padding:0;width:50px;">
+        <div style="text-align:center;padding:1px 2px;min-height:26px;display:flex;align-items:center;justify-content:center;">${printTally(data[tRow][col])}</div>
+        <div style="height:1px;background:#ccc;margin:0 2px;"></div>
+        <div style="text-align:center;padding:1px 2px;min-height:26px;display:flex;align-items:center;justify-content:center;">${printTally(data[rRow][col])}</div>
+      </td>`).join('');
+    return`<tr>
+      <td style="border:1px solid #999;padding:0;font-size:10px;width:130px;vertical-align:top;">
+        <div style="font-weight:700;padding:3px 6px 2px 6px;line-height:1.3;">${tLabel}</div>
+        <div style="height:1px;background:#ccc;margin:0 4px;"></div>
+        <div style="color:#444;font-size:9px;padding:2px 6px 3px 6px;line-height:1.3;">${rLabel}</div>
+      </td>
+      ${cells}
+      <td style="border:1px solid #999;padding:0;width:40px;vertical-align:top;">
+        <div style="min-height:26px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">${tTotal||''}</div>
+        <div style="height:1px;background:${hasAny?'#ccc':'transparent'};margin:0 2px;"></div>
+        <div style="min-height:26px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">${rTotal||''}</div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const hourHeaders=DS_HOURS_PRINT.map(h=>`<th style="border:1px solid #999;padding:3px 1px;font-size:9px;width:50px;">${h.replace('-','<br/>')}</th>`).join('');
+
+  const defsRows=behaviors.map((b,i)=>`
+    <tr>
+      <td style="border:1px solid #ccc;padding:8px 10px;width:38%;vertical-align:top;font-size:11px;">
+        <div style="font-weight:700;margin-bottom:4px;">${i+1}. ${b.t||''}</div>
+        <div style="height:1px;background:#999;margin:4px 0;"></div>
+        <div style="font-weight:700;">${b.r||''}</div>
+      </td>
+      <td style="border:1px solid #ccc;padding:8px 10px;vertical-align:top;font-size:11px;">${b.def||''}</td>
+    </tr>`).join('');
+
+  return `<div class="print-page" style="page-break-before:always;font-family:Arial,sans-serif;padding:12mm 14mm;">
+    <div style="text-align:center;font-size:15px;font-weight:700;margin-bottom:8px;">Data Collection Form</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;font-size:12px;">
+      <div><strong>Client Name:</strong> ${clientName}</div>
+      <div><strong>Date:</strong> ${fmtDate(date)}</div>
+      <div><strong>Location:</strong> ${locChks}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:10px;">
+      <thead>
+        <tr>
+          <th style="border:1px solid #999;padding:4px 6px;font-size:10px;width:130px;background:#f0f0f0;">Target Behavior<br/>Replacement Behavior</th>
+          ${hourHeaders}
+          <th style="border:1px solid #999;padding:4px;font-size:10px;width:40px;background:#f0f0f0;">Total</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:12px;">
+      <thead>
+        <tr>
+          <th style="border:1px solid #ccc;padding:6px 10px;text-align:left;font-size:11px;background:#f0f0f0;width:38%;">Target /Replacement Behavior</th>
+          <th style="border:1px solid #ccc;padding:6px 10px;text-align:left;font-size:11px;background:#f0f0f0;">Full definition of behavior</th>
+        </tr>
+      </thead>
+      <tbody>${defsRows}</tbody>
+    </table>
+    <div style="display:flex;align-items:flex-end;gap:8px;margin-top:10px;font-size:11px;">
+      <span style="white-space:nowrap;font-weight:700;">Staff Signature</span>
+      <span style="flex:2;border-bottom:1px solid #000;display:flex;align-items:flex-end;padding-bottom:2px;">
+        <img src="${sigSrc}" style="height:36px;width:auto;object-fit:contain;filter:contrast(1.2);" alt="Signature"/>
+        <span style="font-weight:600;color:#333;margin-left:4px;white-space:nowrap;">(BHT)</span>
+      </span>
+      <span style="white-space:nowrap;font-weight:700;margin-left:24px;">Staff Name (print):</span>
+      <span style="flex:1;border-bottom:1px solid #000;padding-bottom:2px;font-size:12px;">${staffName}</span>
+    </div>
+  </div>`;
+}
+
+// ── DATA SHEET ────────────────────────────────────────────
+const DS_KEY = 'bht_datasheet_v1';
+const DS_HOURS = ['8–9 am','9–10 am','10–11 am','11–12 noon','12–1 pm','1–2 pm','2–3 pm','3–4 pm','4–5 pm','5–6 pm','6–7 pm','7–8 pm'];
+
+// dsData[rowIdx][colIdx] = count 0-5
+// Rows 0,2,4 = Target behaviors 1,2,3 ; Rows 1,3,5 = Replacement behaviors 1,2,3
+let dsData = [[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]];
+let dsCurrentKey = '';
+
+function getDSDB(){ try{return JSON.parse(localStorage.getItem(DS_KEY)||'{}')}catch(e){return{}} }
+function saveDSDB(db){ localStorage.setItem(DS_KEY,JSON.stringify(db)); }
+
+function dsKey(date,loc){ return date+'|||'+(loc||''); }
+
+function getDSBehaviors(){
+  const cfg = getConfig();
+  return [
+    {
+      t: cfg.b1t||'Bruce is non-complying',
+      r: cfg.b1r||'Bruce will cooperate and be complying towards adults',
+      def: cfg.b1def||'Bruce struggle with being defiance when he does not get his way. Bruce is clearly off task and is defiance towards rules and expectations at times. Bruce finds ways to ignore directions. Bruce struggles with non-compliant behaviors primarily to escape or seek attention whether it is negative or positive.'
+    },
+    {
+      t: cfg.b2t||'Bruce will increase social skills',
+      r: cfg.b2r||'Bruce will exhibit socialization skills when interacting with children',
+      def: cfg.b2def||'Bruce does not understand social skills are used to communicate and interact with each other positively. Bruce has to be prompted several times before he understands he has to share and take turns. (i.e., pushing, hitting, verbal threats).'
+    },
+    {
+      t: cfg.b3t||'Bruce will decrease aggressive behaviors',
+      r: cfg.b3r||'Bruce will increase problem solving solutions with the help of 2 prompts',
+      def: cfg.b3def||'Bruce is always ready to fight. Bruce present aggressive behaviors towards his family/peers.'
+    },
+  ];
+}
+
+function dsGetLoc(){
+  return [...document.querySelectorAll('input[name="ds-loc"]:checked')].map(i=>i.value).join(', ');
+}
+
+function dsToglLoc(el){
+  // Single select for location
+  document.querySelectorAll('input[name="ds-loc"]').forEach(i=>{
+    i.checked=false;
+    i.closest('.check-pill').classList.remove('checked');
+  });
+  el.classList.add('checked');
+  el.querySelector('input').checked=true;
+  dsAutoSave();
+  dsRenderSavedList();
+}
+
+function switchTab(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='summary')refreshSummary();
+  if(name==='records')loadAllRecords();
+  if(name==='print'){if(!_skipBuildPrint){buildPrint();renderGrpTimesPanel();}else{renderGrpTimesPanel();}_skipBuildPrint=false;}
+  if(name==='settings')loadSettingsForm();
+  if(name==='datasheet')dsInit();
+  if(name==='timesheet')tsInit();
+  window.scrollTo(0,0);
+}
+
+function dsInit(){
+  // Always sync Data Sheet date from the main date bar
+  const date = currentDate || new Date().toISOString().split('T')[0];
+  document.getElementById('ds-date').value = date;
+  // Update display label
+  const disp = document.getElementById('ds-date-display');
+  if(disp) disp.textContent = date ? new Date(date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+  // Auto-load existing data sheet for this date if one exists
+  const db = getDSDB();
+  const keys = Object.keys(db).filter(k => k.startsWith(date+'|||'));
+  if(keys.length){
+    // Load first match for this date
+    const rec = db[keys[0]];
+    let loaded = rec.data.map(r=>[...r]);
+    if(loaded.length===3){
+      loaded=[loaded[0],[0,0,0,0,0,0,0,0,0,0,0,0],loaded[1],[0,0,0,0,0,0,0,0,0,0,0,0],loaded[2],[0,0,0,0,0,0,0,0,0,0,0,0]];
+    }
+    dsData=loaded;
+    dsCurrentKey=keys[0];
+    // Restore location
+    document.querySelectorAll('input[name="ds-loc"]').forEach(i=>{
+      const on=rec.loc&&rec.loc.includes(i.value);
+      i.checked=on;
+      i.closest('.check-pill').classList.toggle('checked',on);
+    });
+  } else {
+    // New sheet for this date — reset tallies but keep location
+    dsData=[[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]];
+    dsCurrentKey='';
+  }
+  dsRenderGrid();
+  dsRenderSavedList();
+}
+
+function dsRenderGrid(){
+  const behaviors = getDSBehaviors();
+  const tbody = document.getElementById('ds-tbody');
+  if(!tbody) return;
+  let rows = '';
+  // 3 behavior groups, each with T row (dataRow 0,2,4) and R row (dataRow 1,3,5)
+  // Each group renders as a single <tr> where each hour cell is split top/bottom by a gray line
+  const groups = [
+    {tLabel:`1-T ${behaviors[0].t}`, rLabel:`R-${behaviors[0].r}`, tRow:0, rRow:1},
+    {tLabel:`2-T ${behaviors[1].t}`, rLabel:`R ${behaviors[1].r}`,  tRow:2, rRow:3},
+    {tLabel:`3-T ${behaviors[2].t}`, rLabel:`R ${behaviors[2].r}`,  tRow:4, rRow:5},
+  ];
+  groups.forEach(({tLabel,rLabel,tRow,rRow})=>{
+    const tTotal = dsData[tRow].reduce((a,b)=>a+b,0);
+    const rTotal = dsData[rRow].reduce((a,b)=>a+b,0);
+    const cells = dsData[tRow].map((_,col)=>`
+      <td class="ds-count-cell" style="padding:0;vertical-align:top;">
+        <div onclick="dsCellClick(${tRow},${col},this,'t')" data-row="${tRow}" data-col="${col}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:28px;cursor:pointer;padding:1px;">
+          <div class="ds-tally">${dsTallyHTML(dsData[tRow][col])}</div>
+          <div style="font-size:8px;color:var(--ink3);">${dsData[tRow][col]>0?dsData[tRow][col]:''}</div>
+        </div>
+        <div style="height:1px;background:#ccc;margin:0 2px;"></div>
+        <div onclick="dsCellClick(${rRow},${col},this,'r')" data-row="${rRow}" data-col="${col}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:28px;cursor:pointer;padding:1px;">
+          <div class="ds-tally">${dsTallyHTML(dsData[rRow][col])}</div>
+          <div style="font-size:8px;color:var(--ink3);">${dsData[rRow][col]>0?dsData[rRow][col]:''}</div>
+        </div>
+      </td>`).join('');
+    rows+=`<tr>
+      <td class="ds-behavior-cell" style="padding:0;vertical-align:top;">
+        <div style="padding:3px 8px 2px 8px;"><div class="ds-t">${tLabel}</div></div>
+        <div style="height:1px;background:#ccc;margin:0 4px;"></div>
+        <div style="padding:2px 8px 3px 8px;"><div class="ds-r">${rLabel}</div></div>
+      </td>
+      ${cells}
+      <td class="ds-total-cell" style="padding:0;vertical-align:top;">
+        <div style="min-height:28px;display:flex;align-items:center;justify-content:center;font-size:10px;">${tTotal||''}</div>
+        <div style="height:1px;background:#ccc;margin:0 2px;"></div>
+        <div style="min-height:28px;display:flex;align-items:center;justify-content:center;font-size:10px;">${rTotal||''}</div>
+      </td>
+    </tr>`;
+  });
+  tbody.innerHTML=rows;
+}
+
+function dsTallyHTML(n){
+  if(n===0) return '<span style="color:#ddd;font-size:18px;">—</span>';
+  // Draw tally marks as SVG lines
+  const w=34, h=22;
+  let lines='';
+  const vLines=Math.min(n,4);
+  for(let i=0;i<vLines;i++){
+    const x=5+i*7;
+    lines+=`<line x1="${x}" y1="2" x2="${x}" y2="${h-2}" stroke="#333" stroke-width="1.5"/>`;
+  }
+  if(n===5){
+    lines+=`<line x1="3" y1="${h-3}" x2="${w-3}" y2="3" stroke="#333" stroke-width="1.5"/>`;
+  }
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${lines}</svg>`;
+}
+
+function dsCellClick(row, col, div, half){
+  const cur = dsData[row][col];
+  const next = cur >= 5 ? 0 : cur + 1;
+  dsData[row][col] = next;
+  // Update the clicked half-div
+  div.innerHTML=`<div class="ds-tally">${dsTallyHTML(next)}</div>
+    <div style="font-size:9px;color:var(--ink3);">${next>0?next:''}</div>`;
+  // Update total cell for this group row
+  // tRow is even (0,2,4), rRow is tRow+1
+  const tRow = (row % 2 === 0) ? row : row - 1;
+  const rRow = tRow + 1;
+  const tTotal = dsData[tRow].reduce((a,b)=>a+b,0);
+  const rTotal = dsData[rRow].reduce((a,b)=>a+b,0);
+  // Find the tr parent
+  const tr = div.closest('tr');
+  if(tr){
+    const totalCell = tr.lastElementChild;
+    const halves = totalCell.querySelectorAll('div[style*="min-height"]');
+    if(halves[0]) halves[0].textContent = tTotal||'';
+    if(halves[1]) halves[1].textContent = rTotal||'';
+  }
+  dsAutoSave();
+}
+
+let dsAutoSaveTimer=null;
+function dsAutoSave(){
+  clearTimeout(dsAutoSaveTimer);
+  dsAutoSaveTimer=setTimeout(()=>{
+    const date=currentDate||document.getElementById('ds-date').value;
+    const loc=dsGetLoc();
+    if(!date)return;
+    const key=dsKey(date,loc);
+    dsCurrentKey=key;
+    const db=getDSDB();
+    db[key]={date,loc,data:dsData.map(r=>[...r]),savedAt:new Date().toISOString()};
+    saveDSDB(db);
+    dsRenderSavedList();
+  },1000);
+}
+
+function dsNew(){
+  // Reset tallies only — date stays locked to the main date bar
+  if(!confirm('Clear all tally data for this date and start fresh?')) return;
+  dsData=[[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]];
+  dsCurrentKey='';
+  document.querySelectorAll('input[name="ds-loc"]').forEach(i=>{i.checked=false;i.closest('.check-pill').classList.remove('checked');});
+  dsRenderGrid();
+  showToast('Data sheet cleared');
+}
+
+function dsLoad(key){
+  const db=getDSDB();
+  const rec=db[key];
+  if(!rec)return;
+  // Backward-compat: old saves had 3 rows; expand to 6 if needed
+  let loaded = rec.data.map(r=>[...r]);
+  if(loaded.length === 3){
+    loaded = [loaded[0],[0,0,0,0,0,0,0,0,0,0,0,0],loaded[1],[0,0,0,0,0,0,0,0,0,0,0,0],loaded[2],[0,0,0,0,0,0,0,0,0,0,0,0]];
+  }
+  dsData=loaded;
+  dsCurrentKey=key;
+  document.getElementById('ds-date').value=rec.date||'';
+  // Update date display label
+  const disp=document.getElementById('ds-date-display');
+  if(disp&&rec.date) disp.textContent=new Date(rec.date+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  // Set location
+  document.querySelectorAll('input[name="ds-loc"]').forEach(i=>{
+    const on=rec.loc&&rec.loc.includes(i.value);
+    i.checked=on;
+    i.closest('.check-pill').classList.toggle('checked',on);
+  });
+  dsRenderGrid();
+  dsRenderSavedList();
+  showToast('Data sheet loaded');
+}
+
+function dsDelete(key){
+  if(!confirm('Delete this data sheet?'))return;
+  const db=getDSDB();
+  delete db[key];
+  saveDSDB(db);
+  dsRenderSavedList();
+  showToast('Deleted');
+}
+
+// Store DS keys in a lookup map so onclick can use a safe numeric index
+let _dsKeyMap = {};
+
+function dsRenderSavedList(){
+  const db=getDSDB();
+  const el=document.getElementById('ds-saved-list');
+  if(!el)return;
+  _dsKeyMap = {};
+  // Only show saved sheets for the current date
+  const date=currentDate||document.getElementById('ds-date').value;
+  const keys=Object.keys(db)
+    .filter(k=>k.startsWith(date+'|||'))
+    .sort((a,b)=>new Date(b.split('|||')[0])-new Date(a.split('|||')[0]));
+  if(!keys.length){
+    el.innerHTML='<div style="color:var(--ink3);font-size:13px;">No saved data sheet for this date yet.</div>';
+    return;
+  }
+  el.innerHTML=keys.map((k,idx)=>{
+    _dsKeyMap[idx]=k;
+    const r=db[k];
+    const t=r.savedAt?new Date(r.savedAt).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'';
+    const isActive=dsCurrentKey===k;
+    return`<div class="ds-saved-row" style="${isActive?'border-color:var(--accent);background:var(--accent-light);':''}">
+      <div>
+        <div style="font-weight:600;font-size:13px;">${r.loc||'No location'}${isActive?' <span style="font-size:11px;color:var(--accent);">&#10003; Active</span>':''}</div>
+        <div style="font-size:11px;color:var(--ink3);">Last saved ${t}</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-sm btn-accent" onclick="dsLoadByIdx(${idx})">Load</button>
+        <button class="btn-sm btn-danger" onclick="dsDeleteByIdx(${idx})">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function dsLoadByIdx(idx){
+  const key=_dsKeyMap[idx];
+  if(!key){showToast('Could not find sheet');return;}
+  dsLoad(key);
+}
+
+function dsDeleteByIdx(idx){
+  const key=_dsKeyMap[idx];
+  if(!key){showToast('Could not find sheet');return;}
+  dsDelete(key);
+}
+
+function dsPrint(){
+  // Load ALL saved sheets for the current date from storage and print each as its own page
+  const date = currentDate || document.getElementById('ds-date').value;
+  const db = getDSDB();
+  const keys = Object.keys(db).filter(k => k.startsWith(date + '|||'));
+
+  // Build pages from storage
+  let pages = keys.map(k => {
+    const rec = db[k];
+    if(!rec || !rec.data) return null;
+    let data = rec.data.map(r => [...r]);
+    if(data.length === 3){
+      data = [data[0],[0,0,0,0,0,0,0,0,0,0,0,0],data[1],[0,0,0,0,0,0,0,0,0,0,0,0],data[2],[0,0,0,0,0,0,0,0,0,0,0,0]];
+    }
+    if(!data.some(row => row.some(v => v > 0))) return null;
+    return buildDSPrintPageFromData(date, rec.loc || '', data);
+  }).filter(Boolean);
+
+  // If nothing in storage yet, fall back to current in-memory dsData
+  if(!pages.length){
+    const hasData = dsData.some(row => row.some(v => v > 0));
+    if(hasData){
+      pages = [buildDSPrintPageFromData(date, dsGetLoc(), dsData)];
+    }
+  }
+
+  if(!pages.length){ showToast('No data to print'); return; }
+
+  const cfg = getConfig();
+  const sigSrc = window._BHT_SIG || getPrintSignatureSrc() || '';
+
+  // Strip page-break-before from first page, keep for subsequent
+  const html = pages.map((p, i) =>
+    i === 0 ? p.replace('page-break-before:always;', '') : p
+  ).join('');
+
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(`<!DOCTYPE html><html><head><title>Data Collection Form</title>
+    <style>/* TIMESHEET */
+.ts-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.ts-week-label{font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:4px;}
+.ts-week-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.ts-week-nav button{padding:6px 14px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--ink2);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+.ts-week-nav button:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.ts-week-display{font-size:14px;font-weight:700;color:var(--ink);flex:1;text-align:center;}
+.ts-table-wrap{overflow-x:auto;margin-bottom:12px;}
+.ts-table{border-collapse:collapse;width:100%;min-width:700px;font-size:12px;}
+.ts-table th{background:#f0f0f0;border:1px solid #ccc;padding:6px 5px;text-align:center;font-size:11px;font-weight:700;white-space:nowrap;}
+.ts-table td{border:1px solid #ccc;padding:2px 3px;vertical-align:middle;}
+.ts-table td input{width:100%;border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;padding:3px 4px;outline:none;text-align:center;}
+.ts-table td input:focus{background:var(--accent-light);}
+.ts-table td.ts-name-cell input{text-align:left;}
+.ts-summary-row{display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--ink2);padding:8px 0;}
+.ts-summary-row span{font-weight:700;color:var(--ink);}
+.ts-print-btn{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:8px;}
+
+@page{size:A4 landscape;margin:0;}body{margin:0;padding:0;font-family:Arial,sans-serif;}@media print{body{margin:0;}.print-page{page-break-before:always;}}</style>
+    </head><body>${html}
+    <scr` + `ipt>window.onload=function(){window.print();setTimeout(()=>window.close(),500);}</scr` + `ipt>
+    </body></html>`);
+  win.document.close();
+}
+
+// Wire settings save/load for behavior definitions
+const _origSaveSettings = typeof saveSettings === 'function' ? saveSettings : null;
+const _origLoadSettings = typeof loadSettingsForm === 'function' ? loadSettingsForm : null;
+
+// Patch saveSettings to include behavior defs
+(function(){
+  const orig = window.saveSettings;
+  window.saveSettings = function(){
+    orig();
+    // Also save behavior defs
+    const cfg = getConfig();
+    cfg.b1t=document.getElementById('cfg-b1t')?.value||'';
+    cfg.b1r=document.getElementById('cfg-b1r')?.value||'';
+    cfg.b1def=document.getElementById('cfg-b1def')?.value||'';
+    cfg.b2t=document.getElementById('cfg-b2t')?.value||'';
+    cfg.b2r=document.getElementById('cfg-b2r')?.value||'';
+    cfg.b2def=document.getElementById('cfg-b2def')?.value||'';
+    cfg.b3t=document.getElementById('cfg-b3t')?.value||'';
+    cfg.b3r=document.getElementById('cfg-b3r')?.value||'';
+    cfg.b3def=document.getElementById('cfg-b3def')?.value||'';
+    saveConfig(cfg);
+    showToast('Settings saved ✓');
+  };
+  const origLoad = window.loadSettingsForm;
+  window.loadSettingsForm = function(){
+    origLoad();
+    const cfg = getConfig();
+    ['b1t','b1r','b1def','b2t','b2r','b2def','b3t','b3r','b3def'].forEach(k=>{
+      const el=document.getElementById('cfg-'+k);
+      if(el) el.value=cfg[k]||'';
+    });
+    // Pre-fill defaults if empty
+    const defaults={
+      b1t:'Bruce is non-complying',
+      b1r:'Bruce will cooperate and be complying towards adults',
+      b1def:'Bruce struggle with being defiance when he does not get his way. Bruce is clearly off task and is defiance towards rules and expectations at times. Bruce finds ways to ignore directions. Bruce struggles with non-compliant behaviors primarily to escape or seek attention whether it is negative or positive.',
+      b2t:'Bruce will increase social skills',
+      b2r:'Bruce will exhibit socialization skills when interacting with children',
+      b2def:'Bruce does not understand social skills are used to communicate and interact with each other positively. Bruce has to be prompted several times before he understands he has to share and take turns.',
+      b3t:'Bruce will decrease aggressive behaviors',
+      b3r:'Bruce will increase problem solving solutions with the help of 2 prompts',
+      b3def:'Bruce is always ready to fight. Bruce present aggressive behaviors towards his family/peers.',
+    };
+    Object.entries(defaults).forEach(([k,v])=>{
+      const el=document.getElementById('cfg-'+k);
+      if(el&&!el.value) el.value=v;
+    });
+  };
+})();
+
+// ── TIMESHEET ─────────────────────────────────────────────
+const TS_KEY = 'bht_timesheet_v1';
+const TS_DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const TS_TOTAL_ROWS = 21; // fixed data rows
+
+let tsCurrentSunday = null; // yyyy-mm-dd of the week's Sunday
+
+function getTSDB(){ try{return JSON.parse(localStorage.getItem(TS_KEY)||'{}')}catch(e){return{}} }
+function saveTSDB(db){ localStorage.setItem(TS_KEY,JSON.stringify(db)); }
+
+// Get Sunday of the week containing a date
+function getSunday(dateStr){
+  const d = new Date(dateStr+'T12:00');
+  const day = d.getDay(); // 0=Sun
+  const diff = (7 - day) % 7; // days until next Sunday (0 if already Sun)
+  // Actually we want the Sunday that ENDS the week (Mon-Sun)
+  // Mon=1 -> diff=6, Sun=0 -> diff=0
+  const sun = new Date(d);
+  sun.setDate(d.getDate() + (day === 0 ? 0 : 7 - day));
+  return sun.toISOString().split('T')[0];
+}
+
+// Get Monday of the week
+function getMonday(sundayStr){
+  const d = new Date(sundayStr+'T12:00');
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - 6);
+  return mon.toISOString().split('T')[0];
+}
+
+function fmtShortDate(dateStr){
+  if(!dateStr) return '';
+  const dt = new Date(dateStr+'T12:00');
+  return (dt.getMonth()+1)+'/'+dt.getDate()+'/'+dt.getFullYear();
+}
+
+function fmt12hrTS(t){
+  if(!t) return '';
+  const[h,m]=t.split(':').map(Number);
+  const ampm=h>=12?'pm':'am';
+  const hr=h%12||12;
+  return hr+':'+(m<10?'0':'')+m+' '+ampm;
+}
+
+function calcHrsFromTimes(st,et){
+  if(!st||!et) return '';
+  const[sh,sm]=st.split(':').map(Number);
+  const[eh,em]=et.split(':').map(Number);
+  let mins=(eh*60+em)-(sh*60+sm);
+  if(mins<=0) mins+=24*60;
+  const h=Math.floor(mins/60),mn=mins%60;
+  if(mn===0) return h+'';
+  return h+'.'+Math.round(mn/60*10); // e.g. 6.5
+}
+
+function tsInit(){
+  // Use currentDate from main app if available, else today
+  const refDate = (typeof currentDate !== 'undefined' && currentDate) ? currentDate : new Date().toISOString().split('T')[0];
+  tsCurrentSunday = getSunday(refDate);
+  tsRender();
+}
+
+function tsNavWeek(dir){
+  const d = new Date(tsCurrentSunday+'T12:00');
+  d.setDate(d.getDate() + dir*7);
+  tsCurrentSunday = d.toISOString().split('T')[0];
+  tsRender();
+}
+
+function tsRender(){
+  const monday = getMonday(tsCurrentSunday);
+  const sunday = tsCurrentSunday;
+  const cfg = getConfig();
+  const staffName = cfg.staffName || 'Yasoda Vegi';
+  const clientName = cfg.clientName || 'Bruce Ford Carter II';
+
+  // Format week display
+  const monDt = new Date(monday+'T12:00');
+  const sunDt = new Date(sunday+'T12:00');
+  const opts = {month:'short',day:'numeric'};
+  document.getElementById('ts-week-display').textContent =
+    monDt.toLocaleDateString('en-US',opts) + ' – ' + sunDt.toLocaleDateString('en-US',{...opts,year:'numeric'});
+  document.getElementById('ts-week-end').textContent = fmtShortDate(sunday);
+  document.getElementById('ts-emp-name').textContent = staffName;
+
+  // Load saved timesheet or build from records
+  const db = getTSDB();
+  let tsRows = db[sunday] ? db[sunday].rows : null;
+
+  if(!tsRows){
+    tsRows = tsAutoBuildRows(monday, sunday, clientName);
+    db[sunday] = {rows: tsRows, staffName};
+    saveTSDB(db);
+  }
+
+  tsRenderTable(tsRows, sunday, staffName);
+  tsUpdateTotals(tsRows);
+}
+
+function tsAutoBuildRows(monday, sunday, clientName){
+  const recDB = getDB();
+  const rows = [];
+
+  // Iterate Mon to Sat (Sun handled by supervision)
+  const monDt = new Date(monday+'T12:00');
+  for(let i=0; i<7; i++){
+    const d = new Date(monDt);
+    d.setDate(monDt.getDate()+i);
+    const dateStr = d.toISOString().split('T')[0];
+    const rec = recDB[dateStr];
+    if(!rec) continue;
+
+    const sessPersons = rec.personsPresent ? rec.personsPresent.split(',').map(s=>s.trim()) : [];
+    const sessLocs = rec.location ? rec.location.split(',').map(s=>s.trim()) : [];
+    const sessKey = sessPersons.slice().sort().join(',')+'|||'+sessLocs.slice().sort().join(',');
+    const grpTimes = rec.groupSessionTimes || {};
+
+    // Find all unique groups from entries
+    const groups = {};
+    (rec.entries||[]).forEach(e=>{
+      const p=[...(e.entryPersons&&e.entryPersons.length?e.entryPersons:sessPersons)].sort().join(',');
+      const l=[...(e.entryLocation&&e.entryLocation.length?e.entryLocation:sessLocs)].sort().join(',');
+      const k=p+'|||'+l;
+      if(!groups[k]) groups[k]={persons:p?p.split(','):[],locs:l?l.split(','):[]};
+    });
+
+    // If no entries, use session-level group
+    if(Object.keys(groups).length===0 && (sessPersons.length||sessLocs.length)){
+      groups[sessKey]={persons:sessPersons,locs:sessLocs};
+    }
+
+    Object.entries(groups).forEach(([key,grp])=>{
+      const isMain = key===sessKey;
+      const saved = grpTimes[key]||null;
+      const st = saved?saved.startTime:(isMain?rec.startTime||'':'');
+      const et = saved?saved.endTime:(isMain?rec.endTime||'':'');
+      const hrs = calcHrsFromTimes(st,et)||(isMain?rec.totalHours||rec.totalHrs||'':'');
+      const dayName = TS_DAYS[d.getDay()];
+
+      rows.push({
+        clientName: clientName,
+        day: dayName,
+        date: fmtShortDate(dateStr),
+        timeStarted: fmt12hrTS(st),
+        timeFinished: fmt12hrTS(et),
+        service: 'BHT',
+        authorizedHours: '40',
+        totalHours: hrs,
+        hold: '',
+        bill: ''
+      });
+    });
+  }
+
+  // Insert supervision row right after last filled data row
+  const lastFilledIdx = rows.reduce((last,r,i)=>(r.clientName||r.date||r.totalHours)?i:last, -1);
+  const supPosition = lastFilledIdx + 1; // right after last filled row
+
+  const supRow = {
+    clientName:'BHT Supervision',
+    day:'Sun',
+    date: fmtShortDate(sunday),
+    timeStarted:'9:00 am',
+    timeFinished:'10:00 am',
+    service:'BHT',
+    authorizedHours:'40',
+    totalHours:'1',
+    hold:'',
+    bill:'',
+    isSupervision:true
+  };
+
+  rows.splice(supPosition, 0, supRow);
+
+  // Pad total to 22 rows (21 data + 1 supervision)
+  while(rows.length < TS_TOTAL_ROWS + 1) rows.push({clientName:'',day:'',date:'',timeStarted:'',timeFinished:'',service:'',authorizedHours:'',totalHours:'',hold:'',bill:''});
+  if(rows.length > TS_TOTAL_ROWS + 1) rows.splice(TS_TOTAL_ROWS + 1);
+
+  return rows;
+}
+
+function tsAutoFill(){
+  const cfg = getConfig();
+  const monday = getMonday(tsCurrentSunday);
+  const rows = tsAutoBuildRows(monday, tsCurrentSunday, cfg.clientName||'Bruce Ford Carter II');
+  const db = getTSDB();
+  db[tsCurrentSunday] = {rows, staffName: cfg.staffName||'Yasoda Vegi'};
+  saveTSDB(db);
+  tsRenderTable(rows, tsCurrentSunday, cfg.staffName||'Yasoda Vegi');
+  tsUpdateTotals(rows);
+  showToast('Timesheet refreshed from records ✓');
+}
+
+function tsRenderTable(rows, sunday, staffName){
+  const tbody = document.getElementById('ts-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = rows.map((r,i)=>{
+    const trClass = '';
+    return `<tr ${trClass} data-idx="${i}">
+      <td class="ts-name-cell"><input value="${(r.clientName||'').replace(/"/g,'&quot;')}" onchange="tsUpdateCell(${i},'clientName',this.value)"/></td>
+      <td><input value="${r.day||''}" onchange="tsUpdateCell(${i},'day',this.value)" style="width:38px;"/></td>
+      <td><input value="${r.date||''}" onchange="tsUpdateCell(${i},'date',this.value)"/></td>
+      <td><input value="${r.timeStarted||''}" onchange="tsUpdateCell(${i},'timeStarted',this.value)"/></td>
+      <td><input value="${r.timeFinished||''}" onchange="tsUpdateCell(${i},'timeFinished',this.value)"/></td>
+      <td><input value="${r.service||''}" onchange="tsUpdateCell(${i},'service',this.value)" style="width:50px;"/></td>
+      <td><input value="${r.authorizedHours||''}" onchange="tsUpdateCell(${i},'authorizedHours',this.value)" style="width:60px;"/></td>
+      <td><input value="${r.totalHours||''}" onchange="tsUpdateCell(${i},'totalHours',this.value);tsUpdateTotalsFromDOM()" style="width:50px;font-weight:600;"/></td>
+      <td><input value="" style="width:32px;" onchange="tsUpdateCell(${i},'hold',this.value)"/></td>
+      <td><input value="" style="width:32px;" onchange="tsUpdateCell(${i},'bill',this.value)"/></td>
+    </tr>`;
+  }).join('');
+}
+
+function tsUpdateCell(idx, field, val){
+  const db = getTSDB();
+  if(!db[tsCurrentSunday]) return;
+  db[tsCurrentSunday].rows[idx][field] = val;
+  saveTSDB(db);
+  if(field==='totalHours') tsUpdateTotalsFromDOM();
+}
+
+function tsUpdateTotalsFromDOM(){
+  const db = getTSDB();
+  const rows = db[tsCurrentSunday]?.rows||[];
+  tsUpdateTotals(rows);
+}
+
+function tsUpdateTotals(rows){
+  let bhtHrs = 0;
+  rows.forEach(r=>{
+    if(!r.isSupervision && r.totalHours){
+      const n = parseFloat(r.totalHours);
+      if(!isNaN(n)) bhtHrs += n;
+    }
+  });
+  const bhtEl = document.getElementById('ts-bht-hours');
+  const supEl = document.getElementById('ts-sup-hours');
+  const bhtTot = document.getElementById('ts-bht-total');
+  const supTot = document.getElementById('ts-sup-total');
+  if(bhtEl) bhtEl.textContent = bhtHrs % 1 === 0 ? bhtHrs : bhtHrs.toFixed(1);
+  if(supEl) supEl.textContent = '1';
+  if(bhtTot) bhtTot.textContent = bhtHrs % 1 === 0 ? bhtHrs : bhtHrs.toFixed(1);
+  if(supTot) supTot.textContent = '1';
+}
+
+function tsPrint(){
+  const db = getTSDB();
+  const rec = db[tsCurrentSunday];
+  if(!rec) { showToast('No timesheet data'); return; }
+  const rows = rec.rows || [];
+  const cfg = getConfig();
+  const staffName = cfg.staffName || 'Yasoda Vegi';
+  const clientName = cfg.clientName || 'Bruce Ford Carter II';
+  const sigSrc = window._BHT_SIG || getPrintSignatureSrc() || '';
+
+  let bhtHrs = 0;
+  rows.forEach(r=>{ if(!r.isSupervision&&r.totalHours){const n=parseFloat(r.totalHours);if(!isNaN(n))bhtHrs+=n;}});
+
+  const TOTAL_ROWS = 15;
+  const paddedRows = rows.slice();
+  while(paddedRows.length < TOTAL_ROWS) paddedRows.push(null);
+
+  const tableRows = paddedRows.map(r=> r ? `
+    <tr style="height:22px;">
+      <td style="border:1px solid #999;padding:2px 5px;text-align:left;height:22px;">${r.clientName||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.day||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.date||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.timeStarted||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.timeFinished||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.service||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.authorizedHours||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;font-weight:600;">${r.totalHours||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;"></td>
+    </tr>` : `
+    <tr style="height:22px;">
+      <td style="border:1px solid #999;padding:2px 5px;height:22px;">&nbsp;</td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+    </tr>`).join('');
+
+  const printHTML = `
+    <div style="font-family:Arial,sans-serif;padding:10mm 12mm;max-width:none;min-height:calc(297mm - 20mm);display:flex;flex-direction:column;">
+      <div style="text-align:center;margin-bottom:4px;">
+        <div style="font-size:16px;font-weight:700;">Omni Health Services, Inc.</div>
+        <div style="font-size:13px;font-weight:600;margin-top:2px;">Employee Time Slip</div>
+        <div style="font-size:12px;margin-top:2px;">Intensive Behavioral Health Services (IBHS)</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px;font-size:12px;">
+        <div>Employee Name: <span style="border-bottom:1px solid #000;display:inline-block;min-width:200px;padding-bottom:1px;">${staffName}</span></div>
+        <div>Week ending Date (Sunday): <span style="border-bottom:1px solid #000;display:inline-block;min-width:100px;padding-bottom:1px;">${fmtShortDate(tsCurrentSunday)}</span></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px;table-layout:fixed;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th style="border:1px solid #999;padding:5px;text-align:left;width:20%;">Client's Name</th>
+            <th style="border:1px solid #999;padding:5px;width:6%;">Day</th>
+            <th style="border:1px solid #999;padding:5px;width:9%;">Date</th>
+            <th style="border:1px solid #999;padding:5px;width:9%;">Time Started</th>
+            <th style="border:1px solid #999;padding:5px;width:9%;">Time Finished</th>
+            <th style="border:1px solid #999;padding:5px;width:8%;">Service</th>
+            <th style="border:1px solid #999;padding:5px;width:10%;">Authorized Hours</th>
+            <th style="border:1px solid #999;padding:5px;width:8%;">Total Hours</th>
+            <th style="border:1px solid #999;padding:5px;width:6%;">Hold</th>
+            <th style="border:1px solid #999;padding:5px;width:6%;">Bill</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+      <div style="font-size:11px;margin-bottom:10px;white-space:nowrap;">
+        No of: &nbsp; <strong>BC Hours:</strong> <span style="display:inline-block;min-width:50px;border-bottom:1px solid #000;padding-bottom:1px;">&nbsp;</span> &nbsp; <strong>MT Hours:</strong> <span style="display:inline-block;min-width:50px;border-bottom:1px solid #000;padding-bottom:1px;">&nbsp;</span> &nbsp; <strong>BHT Hours:</strong> <span style="display:inline-block;min-width:45px;border-bottom:1px solid #000;padding-bottom:1px;text-align:center;">${bhtHrs%1===0?bhtHrs:bhtHrs.toFixed(1)}</span> &nbsp; <strong>Supervision Hours:</strong> <span style="display:inline-block;min-width:45px;border-bottom:1px solid #000;padding-bottom:1px;text-align:center;">1</span>
+      </div>
+      <div style="font-size:11px;margin-bottom:14px;">
+        I certify that I have worked the time listed on this sheet and did not receive any injuries during this assignment.
+      </div>
+      <div style="height:20px;"></div>
+      <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:20px;">
+        <span style="font-size:11px;font-weight:700;white-space:nowrap;">Employee Signature</span>
+        <span style="flex:1;border-bottom:1px solid #000;display:flex;align-items:flex-end;min-height:40px;padding-bottom:2px;">
+          <img src="${sigSrc}" style="height:36px;width:auto;object-fit:contain;filter:contrast(1.2);" alt="Signature"/>
+          <span style="font-size:11px;font-weight:600;margin-left:4px;">(BHT)</span>
+        </span>
+      </div>
+      <div style="font-size:10px;font-style:italic;margin-bottom:10px;">
+        I certify that the hours shown here are correct and that the employee performed satisfactory
+      </div>
+      <div style="border-bottom:1px solid #000;margin-bottom:4px;min-height:30px;"></div>
+      <div style="text-align:center;font-size:11px;">Supervisor Signature</div>
+    </div>`;
+
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write('<!DOCTYPE html><html><head><title>Employee Time Slip</title>' +
+    '<style>@page{size:A4 portrait;margin:0;}body{margin:0;padding:0;width:210mm;height:297mm;}@media print{body{width:210mm;height:297mm;}}</style>' +
+    '</head><body>' + printHTML +
+    '<scr'+'ipt>window.onload=function(){window.print();setTimeout(()=>window.close(),500);}</scr'+'ipt>' +
+    '</body></html>');
+  win.document.close();
+}
+
+// ── BUILD TIMESHEET HTML FOR MULTI-PRINT ─────────────────
+function buildTSPrintHTML(sunday){
+  const cfg = getConfig();
+  const staffName = cfg.staffName || 'Yasoda Vegi';
+  const clientName = cfg.clientName || 'Bruce Ford Carter II';
+  const sigSrc = window._BHT_SIG || getPrintSignatureSrc() || '';
+  const monday = getMonday(sunday);
+
+  // Use saved timesheet or auto-build
+  const tsDB = getTSDB();
+  let rows = tsDB[sunday] ? tsDB[sunday].rows : null;
+  if(!rows) rows = tsAutoBuildRows(monday, sunday, clientName);
+
+  let bhtHrs = 0;
+  rows.forEach(r=>{ if(!r.isSupervision&&r.totalHours){const n=parseFloat(r.totalHours);if(!isNaN(n))bhtHrs+=n;}});
+
+  const TOTAL_ROWS_B = 15;
+  const paddedRowsB = rows.slice();
+  while(paddedRowsB.length < TOTAL_ROWS_B) paddedRowsB.push(null);
+
+  const tableRows = paddedRowsB.map(r=> r ? `
+    <tr style="height:22px;">
+      <td style="border:1px solid #999;padding:2px 5px;text-align:left;height:22px;">${r.clientName||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.day||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.date||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.timeStarted||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.timeFinished||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.service||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;">${r.authorizedHours||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;font-weight:600;">${r.totalHours||''}</td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;text-align:center;"></td>
+    </tr>` : `
+    <tr style="height:22px;">
+      <td style="border:1px solid #999;padding:2px 5px;height:22px;">&nbsp;</td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+      <td style="border:1px solid #999;padding:2px 3px;"></td>
+    </tr>`).join('');
+
+  return `<div class="print-page-portrait" style="font-family:Arial,sans-serif;padding:10mm 12mm;min-height:calc(297mm - 20mm);display:flex;flex-direction:column;box-sizing:border-box;">
+    <div style="text-align:center;margin-bottom:4px;">
+      <div style="font-size:16px;font-weight:700;">Omni Health Services, Inc.</div>
+      <div style="font-size:13px;font-weight:600;margin-top:2px;">Employee Time Slip</div>
+      <div style="font-size:12px;margin-top:2px;">Intensive Behavioral Health Services (IBHS)</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px;font-size:12px;">
+      <div>Employee Name: <span style="border-bottom:1px solid #000;display:inline-block;min-width:200px;padding-bottom:1px;">${staffName}</span></div>
+      <div>Week ending Date (Sunday): <span style="border-bottom:1px solid #000;display:inline-block;min-width:100px;padding-bottom:1px;">${fmtShortDate(sunday)}</span></div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px;table-layout:fixed;">
+      <thead>
+        <tr style="background:#f0f0f0;">
+          <th style="border:1px solid #999;padding:5px;text-align:left;width:20%;">Client's Name</th>
+          <th style="border:1px solid #999;padding:5px;width:6%;">Day</th>
+          <th style="border:1px solid #999;padding:5px;width:9%;">Date</th>
+          <th style="border:1px solid #999;padding:5px;width:9%;">Time Started</th>
+          <th style="border:1px solid #999;padding:5px;width:9%;">Time Finished</th>
+          <th style="border:1px solid #999;padding:5px;width:8%;">Service</th>
+          <th style="border:1px solid #999;padding:5px;width:10%;">Authorized Hours</th>
+          <th style="border:1px solid #999;padding:5px;width:8%;">Total Hours</th>
+          <th style="border:1px solid #999;padding:5px;width:6%;">Hold</th>
+          <th style="border:1px solid #999;padding:5px;width:6%;">Bill</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+    <div style="font-size:11px;margin-bottom:10px;white-space:nowrap;">
+      No of: &nbsp; <strong>BC Hours:</strong> <span style="display:inline-block;min-width:50px;border-bottom:1px solid #000;padding-bottom:1px;">&nbsp;</span> &nbsp; <strong>MT Hours:</strong> <span style="display:inline-block;min-width:50px;border-bottom:1px solid #000;padding-bottom:1px;">&nbsp;</span> &nbsp; <strong>BHT Hours:</strong> <span style="display:inline-block;min-width:45px;border-bottom:1px solid #000;padding-bottom:1px;text-align:center;">${bhtHrs%1===0?bhtHrs:bhtHrs.toFixed(1)}</span> &nbsp; <strong>Supervision Hours:</strong> <span style="display:inline-block;min-width:45px;border-bottom:1px solid #000;padding-bottom:1px;text-align:center;">1</span>
+    </div>
+    <div style="font-size:11px;margin-bottom:14px;">
+      I certify that I have worked the time listed on this sheet and did not receive any injuries during this assignment.
+    </div>
+    <div style="height:20px;"></div>
+    <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:20px;">
+      <span style="font-size:11px;font-weight:700;white-space:nowrap;">Employee Signature</span>
+      <span style="flex:1;border-bottom:1px solid #000;display:flex;align-items:flex-end;min-height:40px;padding-bottom:2px;">
+        <img src="${sigSrc}" style="height:36px;width:auto;object-fit:contain;filter:contrast(1.2);" alt="Signature"/>
+        <span style="font-size:11px;font-weight:600;margin-left:4px;">(BHT)</span>
+      </span>
+    </div>
+    <div style="font-size:10px;font-style:italic;margin-bottom:10px;">
+      I certify that the hours shown here are correct and that the employee performed satisfactory
+    </div>
+    <div style="border-bottom:1px solid #000;margin-bottom:4px;min-height:30px;"></div>
+    <div style="text-align:center;font-size:11px;">Supervisor Signature</div>
+  </div>`;
+}
+
+</script>
+</body>
+</html>
